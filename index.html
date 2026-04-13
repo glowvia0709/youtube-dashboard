@@ -1,289 +1,574 @@
-import { useState, useEffect } from "react";
-
-const DUE_DATE = new Date("2026-09-12T00:00:00");
-
-const defaultData = {
-  ideas: [
-    { type: "growth", text: "태교 여행 브이로그 — 출산 전 마지막 둘만의 여행", id: 1 },
-    { type: "growth", text: "아기방 꾸미기 과정 타임랩스", id: 2 },
-    { type: "review", text: "유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)", id: 3 },
-    { type: "review", text: "아기 모니터, 진짜 필요한가? 써보니까...", id: 4 },
-    { type: "growth", text: "신생아 첫날 — 아빠가 처음 안아봤을 때", id: 5 },
-  ],
-  checks: [
-    { text: "유튜브 채널 계정 생성", done: false },
-    { text: "채널 이름 & 핸들 확정", done: false },
-    { text: "채널 아트 & 프로필 사진 제작", done: false },
-    { text: "채널 소개글 작성", done: false },
-    { text: "첫 영상 촬영 및 편집 완료", done: false },
-    { text: "업로드 스케줄 공개", done: false },
-    { text: "쇼츠 연동 계획 수립", done: false },
-  ],
-  memo: "",
-  weeks: Array(8).fill(null).map((_, i) => ({ week: i + 1, status: "todo" })),
-};
-
-function calcDday() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.round((DUE_DATE - today) / (1000 * 60 * 60 * 24));
-  if (diff > 0) return `D-${diff}`;
-  if (diff === 0) return "D-Day!";
-  return `D+${Math.abs(diff)}`;
-}
-
-export default function App() {
-  const [data, setData] = useState(defaultData);
-  const [ideaInput, setIdeaInput] = useState("");
-  const [ideaType, setIdeaType] = useState("growth");
-  const [dday, setDday] = useState(calcDday());
-
-  useEffect(() => {
-    try {
-      const saved = window.storage && window.storage.get
-        ? null // storage API is async, skip for simplicity
-        : null;
-    } catch (e) {}
-    setDday(calcDday());
-  }, []);
-
-  const save = (newData) => setData({ ...newData });
-
-  const addIdea = () => {
-    if (!ideaInput.trim()) return;
-    const newData = {
-      ...data,
-      ideas: [{ type: ideaType, text: ideaInput.trim(), id: Date.now() }, ...data.ideas],
-    };
-    setIdeaInput("");
-    save(newData);
-  };
-
-  const toggleCheck = (i) => {
-    const checks = data.checks.map((c, idx) => idx === i ? { ...c, done: !c.done } : c);
-    save({ ...data, checks });
-  };
-
-  const cycleWeek = (i) => {
-    const states = ["todo", "plan", "done"];
-    const weeks = data.weeks.map((w, idx) =>
-      idx === i ? { ...w, status: states[(states.indexOf(w.status) + 1) % 3] } : w
-    );
-    save({ ...data, weeks });
-  };
-
-  const totalDone = data.weeks.filter(w => w.status === "done").length;
-  const growthCount = data.ideas.filter(i => i.type === "growth").length;
-  const reviewCount = data.ideas.filter(i => i.type === "review").length;
-
-  return (
-    <div style={{ fontFamily: "'Noto Sans KR', sans-serif", background: "#FAF7F2", minHeight: "100vh", color: "#2C2C2C" }}>
-
-      {/* HEADER */}
-      <div style={{
-        background: "#2C2C2C", padding: "24px 32px",
-        position: "relative", overflow: "hidden"
-      }}>
-        <div style={{
-          position: "absolute", top: -50, right: -50,
-          width: 180, height: 180, borderRadius: "50%",
-          background: "#C4714A", opacity: 0.15
-        }} />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1, flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <div style={{ fontSize: 28, color: "#FAF7F2", fontWeight: 700, letterSpacing: -0.5 }}>
-              아빠의 <span style={{ color: "#D4896A", fontStyle: "italic" }}>기록</span>
-            </div>
-            <div style={{ fontSize: 11, color: "#888", marginTop: 5, letterSpacing: 2, textTransform: "uppercase" }}>
-              아들 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스
-            </div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 44, color: "#D4896A", fontWeight: 700, lineHeight: 1 }}>{dday}</div>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: 1 }}>아들 출산 예정일까지</div>
-            <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>2026년 9월 12일</div>
-          </div>
-        </div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아빠의 기록 — 유튜브 채널 워크스페이스</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm-white: #FDF9F4;
+    --sand: #E8DDD0;
+    --terracotta: #C4714A;
+    --terracotta-light: #D4896A;
+    --terracotta-pale: #F2E8E0;
+    --forest: #3D5A47;
+    --forest-light: #527A60;
+    --forest-pale: #E4EDE7;
+    --charcoal: #2C2C2C;
+    --mid-gray: #7A7A7A;
+    --light-gray: #B8B8B8;
+    --gold: #C9A84C;
+    --gold-pale: #F5EDD8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--charcoal);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+ 
+  header {
+    background: var(--charcoal);
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    opacity: 0.15;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: var(--forest);
+    opacity: 0.2;
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .channel-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--cream);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+  }
+  .channel-title span { font-style: italic; color: var(--terracotta-light); }
+  .channel-sub {
+    font-size: 12px;
+    color: var(--light-gray);
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+  .dday-badge { text-align: right; }
+  .dday-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    color: var(--terracotta-light);
+    line-height: 1;
+  }
+  .dday-label { font-size: 11px; color: var(--light-gray); letter-spacing: 1.5px; text-transform: uppercase; }
+  .dday-date { font-size: 11px; color: #666; margin-top: 2px; }
+ 
+  main { max-width: 960px; margin: 0 auto; padding: 32px 20px 60px; }
+ 
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--mid-gray);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+ 
+  .concept-card {
+    background: var(--charcoal);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .concept-card::after {
+    content: '👶';
+    position: absolute;
+    right: 28px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 52px;
+    opacity: 0.2;
+  }
+  .concept-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--cream);
+    margin-bottom: 10px;
+  }
+  .concept-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+  .pill-terra { background: var(--terracotta); color: white; }
+  .pill-forest { background: var(--forest); color: white; }
+  .pill-gold { background: var(--gold); color: white; }
+  .pill-blue { background: #4A7BC4; color: white; }
+  .pill-outline { border: 1px solid #555; color: var(--light-gray); }
+ 
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    header { padding: 20px; }
+    .channel-title { font-size: 22px; }
+    .dday-num { font-size: 36px; }
+    .header-inner { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .dday-badge { text-align: left; }
+  }
+ 
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 22px 24px;
+    border: 1px solid var(--sand);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-terra { background: var(--terracotta-pale); }
+  .icon-forest { background: var(--forest-pale); }
+  .icon-gold { background: var(--gold-pale); }
+ 
+  .upload-week { display: flex; flex-direction: column; gap: 10px; }
+  .week-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .week-num { width: 48px; color: var(--mid-gray); font-size: 11px; flex-shrink: 0; }
+  .week-bar-wrap { flex: 1; height: 6px; background: var(--sand); border-radius: 10px; overflow: hidden; }
+  .week-bar { height: 100%; border-radius: 10px; background: var(--terracotta); transition: width 0.6s ease; }
+  .week-status { width: 60px; text-align: right; font-size: 11px; flex-shrink: 0; cursor: pointer; }
+  .status-done { color: var(--forest); font-weight: 600; }
+  .status-plan { color: var(--gold); }
+  .status-todo { color: var(--light-gray); }
+ 
+  .idea-list { display: flex; flex-direction: column; gap: 7px; }
+  .idea-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: var(--warm-white);
+    border: 1px solid var(--sand);
+    transition: all 0.2s;
+  }
+  .idea-item:hover { border-color: var(--terracotta); background: var(--terracotta-pale); }
+  .idea-type {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 100px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .type-growth { background: var(--forest-pale); color: var(--forest); }
+  .type-review { background: var(--terracotta-pale); color: var(--terracotta); }
+  .idea-text { font-size: 12px; line-height: 1.4; color: var(--charcoal); }
+ 
+  .check-list { display: flex; flex-direction: column; gap: 2px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--cream);
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-box {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--sand);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 11px;
+  }
+  .check-item.checked .check-box { background: var(--forest); border-color: var(--forest); color: white; }
+  .check-item.checked .check-text { text-decoration: line-through; color: var(--light-gray); }
+ 
+  .next-video-card {
+    background: linear-gradient(135deg, var(--terracotta-pale) 0%, var(--gold-pale) 100%);
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid var(--sand);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+  .next-video-card::before {
+    content: '▶';
+    position: absolute;
+    right: 20px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 60px;
+    color: var(--terracotta);
+    opacity: 0.08;
+  }
+  .next-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--terracotta); margin-bottom: 6px; font-weight: 600; }
+  .next-title { font-family: 'Noto Serif KR', serif; font-size: 20px; color: var(--charcoal); font-weight: 600; margin-bottom: 12px; }
+  .next-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .meta-chip { font-size: 12px; color: var(--mid-gray); display: flex; align-items: center; gap: 4px; }
+  .progress-bar-wrap { margin-top: 14px; height: 4px; background: rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--terracotta); border-radius: 10px; width: 20%; }
+  .progress-text { font-size: 11px; color: var(--mid-gray); margin-top: 6px; text-align: right; }
+ 
+  .add-idea-wrap { display: flex; gap: 8px; margin-top: 12px; }
+  .add-idea-input {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--sand);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    outline: none;
+    background: var(--warm-white);
+    color: var(--charcoal);
+    transition: border 0.2s;
+  }
+  .add-idea-input:focus { border-color: var(--terracotta); }
+  .add-idea-input::placeholder { color: var(--light-gray); }
+  .type-select {
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--sand);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    background: var(--warm-white);
+    color: var(--charcoal);
+    outline: none;
+  }
+  .add-btn {
+    padding: 9px 16px;
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: background 0.2s;
+  }
+  .add-btn:hover { background: var(--terracotta-light); }
+ 
+  .memo-area {
+    width: 100%;
+    min-height: 100px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--charcoal);
+    resize: none;
+    line-height: 1.8;
+  }
+  .memo-area::placeholder { color: var(--light-gray); }
+ 
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--sand);
+    border-radius: 14px;
+    padding: 16px 18px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--charcoal);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 11px; color: var(--mid-gray); }
+ 
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--light-gray);
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--sand);
+  }
+ 
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .concept-card { animation: fadeUp 0.5s ease 0.1s both; }
+  .grid-2 { animation: fadeUp 0.5s ease 0.4s both; }
+</style>
+</head>
+<body>
+ 
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="channel-title">아빠의 <span>기록</span></div>
+      <div class="channel-sub">육아 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스</div>
+    </div>
+    <div class="dday-badge">
+      <div class="dday-num" id="ddayNum">D-?</div>
+      <div class="dday-label">아들 출산 예정일까지</div>
+      <div class="dday-date">2026년 9월 12일</div>
+    </div>
+  </div>
+</header>
+ 
+<main>
+ 
+  <div class="section-label">채널 컨셉</div>
+  <div class="concept-card">
+    <div class="concept-title">아들의 하루하루를 아빠의 시선으로 기록합니다 💙</div>
+    <div class="concept-pills">
+      <span class="pill pill-blue">👶 아들 성장 기록</span>
+      <span class="pill pill-terra">🛒 솔직 육아용품 리뷰</span>
+      <span class="pill pill-gold">📅 주 1회 업로드 목표</span>
+      <span class="pill pill-outline">타겟: 예비·초보 부모</span>
+    </div>
+  </div>
+ 
+  <div class="section-label">다음 업로드 예정 영상</div>
+  <div class="next-video-card">
+    <div class="next-label">NEXT VIDEO</div>
+    <div class="next-title">채널 첫 영상 — 아빠가 된다는 것</div>
+    <div class="next-meta">
+      <span class="meta-chip">🏷️ 성장 기록</span>
+      <span class="meta-chip">📝 기획 중</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
+    <div class="progress-text">기획 20% 완료</div>
+  </div>
+ 
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="totalCount">0</div>
+      <div class="stat-label">총 업로드</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="growthCount">0</div>
+      <div class="stat-label">성장 기록</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="reviewCount">0</div>
+      <div class="stat-label">용품 리뷰</div>
+    </div>
+  </div>
+ 
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-icon icon-terra">📅</div>
+        업로드 일정 트래커
       </div>
-
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "28px 20px 60px" }}>
-
-        {/* 채널 컨셉 */}
-        <Label text="채널 컨셉" />
-        <div style={{
-          background: "#2C2C2C", borderRadius: 16, padding: "24px 28px",
-          marginBottom: 20, position: "relative", overflow: "hidden"
-        }}>
-          <div style={{ position: "absolute", right: 24, top: "50%", transform: "translateY(-50%)", fontSize: 48, opacity: 0.12 }}>👶</div>
-          <div style={{ fontSize: 18, color: "#FAF7F2", fontWeight: 600, marginBottom: 12 }}>
-            아들의 하루하루를 아빠의 시선으로 기록합니다 💙
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Pill color="#4A7BC4">👶 아들 성장 기록</Pill>
-            <Pill color="#C4714A">🛒 솔직 육아용품 리뷰</Pill>
-            <Pill color="#C9A84C">📅 주 1회 업로드 목표</Pill>
-            <Pill color="#555" textColor="#aaa">타겟: 예비·초보 부모</Pill>
-          </div>
-        </div>
-
-        {/* 스탯 */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
-          <StatCard num={totalDone} label="총 업로드" />
-          <StatCard num={growthCount} label="성장 기록 아이디어" />
-          <StatCard num={reviewCount} label="용품 리뷰 아이디어" />
-        </div>
-
-        {/* 트래커 + 아이디어 */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-
-          {/* 업로드 트래커 */}
-          <Card title="📅 업로드 일정 트래커" iconBg="#F2E8E0">
-            {data.weeks.map((w, i) => {
-              const pct = w.status === "done" ? 100 : w.status === "plan" ? 50 : 0;
-              const color = w.status === "done" ? "#3D5A47" : w.status === "plan" ? "#C9A84C" : "#ccc";
-              const label = w.status === "done" ? "완료 ✓" : w.status === "plan" ? "기획중" : "—";
-              return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                  <span style={{ width: 40, fontSize: 11, color: "#999", flexShrink: 0 }}>W{w.week}</span>
-                  <div style={{ flex: 1, height: 6, background: "#E8DDD0", borderRadius: 10, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: "#C4714A", borderRadius: 10, transition: "width 0.4s" }} />
-                  </div>
-                  <span
-                    onClick={() => cycleWeek(i)}
-                    style={{ width: 52, textAlign: "right", fontSize: 11, color, cursor: "pointer", fontWeight: w.status === "done" ? 600 : 400 }}
-                  >{label}</span>
-                </div>
-              );
-            })}
-          </Card>
-
-          {/* 아이디어 보드 */}
-          <Card title="💡 영상 아이디어 보드" iconBg="#F5EDD8">
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
-              {data.ideas.slice(0, 5).map(idea => (
-                <div key={idea.id} style={{
-                  display: "flex", alignItems: "flex-start", gap: 8,
-                  padding: "8px 10px", borderRadius: 10,
-                  background: "#FDF9F4", border: "1px solid #E8DDD0",
-                }}>
-                  <span style={{
-                    fontSize: 10, padding: "2px 7px", borderRadius: 100, fontWeight: 600, flexShrink: 0, marginTop: 1,
-                    background: idea.type === "growth" ? "#E4EDE7" : "#F2E8E0",
-                    color: idea.type === "growth" ? "#3D5A47" : "#C4714A",
-                  }}>
-                    {idea.type === "growth" ? "성장" : "리뷰"}
-                  </span>
-                  <span style={{ fontSize: 12, lineHeight: 1.5 }}>{idea.text}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <select
-                value={ideaType}
-                onChange={e => setIdeaType(e.target.value)}
-                style={{ padding: "8px 8px", borderRadius: 10, border: "1px solid #E8DDD0", fontSize: 12, background: "#FDF9F4", outline: "none" }}
-              >
-                <option value="growth">성장기록</option>
-                <option value="review">용품리뷰</option>
-              </select>
-              <input
-                value={ideaInput}
-                onChange={e => setIdeaInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addIdea()}
-                placeholder="새 아이디어 입력..."
-                style={{ flex: 1, padding: "8px 12px", borderRadius: 10, border: "1px solid #E8DDD0", fontSize: 12, background: "#FDF9F4", outline: "none" }}
-              />
-              <button
-                onClick={addIdea}
-                style={{ padding: "8px 14px", background: "#C4714A", color: "white", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
-              >+</button>
-            </div>
-          </Card>
-        </div>
-
-        {/* 체크리스트 + 메모 */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-
-          <Card title="✅ 채널 개설 체크리스트" iconBg="#E4EDE7">
-            {data.checks.map((c, i) => (
-              <div
-                key={i}
-                onClick={() => toggleCheck(i)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "8px 0", borderBottom: i < data.checks.length - 1 ? "1px solid #F5F0EA" : "none",
-                  cursor: "pointer",
-                }}
-              >
-                <div style={{
-                  width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                  border: c.done ? "none" : "2px solid #E8DDD0",
-                  background: c.done ? "#3D5A47" : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 11, color: "white", transition: "all 0.2s",
-                }}>
-                  {c.done ? "✓" : ""}
-                </div>
-                <span style={{ fontSize: 13, textDecoration: c.done ? "line-through" : "none", color: c.done ? "#B8B8B8" : "#2C2C2C" }}>
-                  {c.text}
-                </span>
-              </div>
-            ))}
-          </Card>
-
-          <Card title="📝 빠른 메모" iconBg="#F5EDD8">
-            <textarea
-              value={data.memo}
-              onChange={e => save({ ...data, memo: e.target.value })}
-              placeholder="채널 운영 아이디어, 기억할 것들을 자유롭게 적어두세요..."
-              style={{
-                width: "100%", minHeight: 160, border: "none", outline: "none",
-                background: "transparent", fontFamily: "inherit", fontSize: 13,
-                color: "#2C2C2C", resize: "none", lineHeight: 1.8,
-              }}
-            />
-          </Card>
-        </div>
-
-        <div style={{ textAlign: "center", fontSize: 12, color: "#ccc", marginTop: 40, paddingTop: 20, borderTop: "1px solid #E8DDD0" }}>
-          아빠의 기록 · 유튜브 채널 워크스페이스 · 호겸님 전용 💙
-        </div>
+      <div class="upload-week" id="weekTracker"></div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-title">
+        <div class="card-icon icon-gold">💡</div>
+        영상 아이디어 보드
+      </div>
+      <div class="idea-list" id="ideaList"></div>
+      <div class="add-idea-wrap">
+        <select class="type-select" id="ideaType">
+          <option value="growth">성장기록</option>
+          <option value="review">용품리뷰</option>
+        </select>
+        <input class="add-idea-input" id="ideaInput" placeholder="새 아이디어 입력..." />
+        <button class="add-btn" onclick="addIdea()">+</button>
       </div>
     </div>
-  );
-}
-
-function Label({ text }) {
-  return <div style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: "#999", marginBottom: 12, fontWeight: 500 }}>{text}</div>;
-}
-
-function Pill({ children, color, textColor = "white" }) {
-  return (
-    <span style={{ padding: "5px 14px", borderRadius: 100, fontSize: 12, fontWeight: 500, background: color, color: textColor }}>
-      {children}
-    </span>
-  );
-}
-
-function StatCard({ num, label }) {
-  return (
-    <div style={{ background: "white", border: "1px solid #E8DDD0", borderRadius: 14, padding: "16px 18px", textAlign: "center" }}>
-      <div style={{ fontSize: 32, fontWeight: 700, color: "#2C2C2C", lineHeight: 1, marginBottom: 4 }}>{num}</div>
-      <div style={{ fontSize: 11, color: "#999" }}>{label}</div>
-    </div>
-  );
-}
-
-function Card({ title, iconBg, children }) {
-  return (
-    <div style={{ background: "white", borderRadius: 16, padding: "20px 22px", border: "1px solid #E8DDD0" }}>
-      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 8, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
-          {title.split(" ")[0]}
-        </div>
-        {title.split(" ").slice(1).join(" ")}
+  </div>
+ 
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-icon icon-forest">✅</div>
+        채널 개설 체크리스트
       </div>
-      {children}
+      <div class="check-list" id="checkList"></div>
     </div>
-  );
-}
+ 
+    <div class="card">
+      <div class="card-title">
+        <div class="card-icon icon-gold">📝</div>
+        빠른 메모
+      </div>
+      <textarea class="memo-area" id="memoArea" placeholder="채널 운영 아이디어, 기억할 것들을 자유롭게 적어두세요..."></textarea>
+    </div>
+  </div>
+ 
+  <div class="footer-note">아빠의 기록 · 유튜브 채널 워크스페이스 · 호겸님 전용 💙</div>
+</main>
+ 
+<script>
+  // ── D-DAY (2026년 9월 12일 기준) ──
+  function calcDday() {
+    const due = new Date('2026-09-12T00:00:00');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diff = Math.round((due - today) / (1000*60*60*24));
+    const el = document.getElementById('ddayNum');
+    if (diff > 0) el.textContent = 'D-' + diff;
+    else if (diff === 0) el.textContent = '🎉 오늘!';
+    else el.textContent = 'D+' + Math.abs(diff);
+  }
+  calcDday();
+ 
+  // ── 데이터 ──
+  let data = JSON.parse(localStorage.getItem('ytWorkspace_v2') || '{}');
+  if (!data.ideas) data.ideas = [
+    { type: 'growth', text: '태교 여행 브이로그 — 출산 전 마지막 둘만의 여행', id: 1 },
+    { type: 'growth', text: '아기방 꾸미기 과정 타임랩스', id: 2 },
+    { type: 'review', text: '유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)', id: 3 },
+    { type: 'review', text: '아기 모니터, 진짜 필요한가? 써보니까...', id: 4 },
+    { type: 'growth', text: '신생아 첫날 — 아빠가 처음 안아봤을 때', id: 5 },
+  ];
+  if (!data.checks) data.checks = [
+    { text: '유튜브 채널 계정 생성', done: false },
+    { text: '채널 이름 & 핸들 확정', done: false },
+    { text: '채널 아트 & 프로필 사진 제작', done: false },
+    { text: '채널 소개글 작성', done: false },
+    { text: '첫 영상 촬영 및 편집 완료', done: false },
+    { text: '업로드 스케줄 공개', done: false },
+    { text: '쇼츠 연동 계획 수립', done: false },
+  ];
+  if (!data.memo) data.memo = '';
+  if (!data.weeks) data.weeks = Array(8).fill(null).map((_,i)=>({ week: i+1, status: 'todo' }));
+ 
+  function save() { localStorage.setItem('ytWorkspace_v2', JSON.stringify(data)); }
+ 
+  // ── 아이디어 ──
+  function renderIdeas() {
+    const el = document.getElementById('ideaList');
+    el.innerHTML = '';
+    data.ideas.slice(0,5).forEach(idea => {
+      const div = document.createElement('div');
+      div.className = 'idea-item';
+      div.innerHTML = `
+        <span class="idea-type ${idea.type==='growth'?'type-growth':'type-review'}">${idea.type==='growth'?'성장':'리뷰'}</span>
+        <span class="idea-text">${idea.text}</span>
+      `;
+      el.appendChild(div);
+    });
+    updateStats();
+  }
+  function addIdea() {
+    const input = document.getElementById('ideaInput');
+    const type = document.getElementById('ideaType').value;
+    if (!input.value.trim()) return;
+    data.ideas.unshift({ type, text: input.value.trim(), id: Date.now() });
+    input.value = '';
+    save(); renderIdeas();
+  }
+  document.getElementById('ideaInput').addEventListener('keydown', e => { if(e.key==='Enter') addIdea(); });
+ 
+  // ── 체크리스트 ──
+  function renderChecks() {
+    const el = document.getElementById('checkList');
+    el.innerHTML = '';
+    data.checks.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.className = 'check-item' + (c.done ? ' checked' : '');
+      div.innerHTML = `<div class="check-box">${c.done?'✓':''}</div><span class="check-text">${c.text}</span>`;
+      div.addEventListener('click', () => { data.checks[i].done = !data.checks[i].done; save(); renderChecks(); });
+      el.appendChild(div);
+    });
+  }
+ 
+  // ── 트래커 ──
+  function renderWeeks() {
+    const el = document.getElementById('weekTracker');
+    el.innerHTML = '';
+    data.weeks.forEach((w, i) => {
+      const pct = w.status==='done'?100:w.status==='plan'?50:0;
+      const cls = w.status==='done'?'status-done':w.status==='plan'?'status-plan':'status-todo';
+      const lbl = w.status==='done'?'완료 ✓':w.status==='plan'?'기획중':'—';
+      const div = document.createElement('div');
+      div.className = 'week-row';
+      div.innerHTML = `
+        <span class="week-num">W${w.week}</span>
+        <div class="week-bar-wrap"><div class="week-bar" style="width:${pct}%"></div></div>
+        <span class="week-status ${cls}" onclick="cycleWeek(${i})">${lbl}</span>
+      `;
+      el.appendChild(div);
+    });
+    updateStats();
+  }
+  window.cycleWeek = function(i) {
+    const s = ['todo','plan','done'];
+    data.weeks[i].status = s[(s.indexOf(data.weeks[i].status)+1)%3];
+    save(); renderWeeks();
+  };
+ 
+  // ── 스탯 ──
+  function updateStats() {
+    document.getElementById('totalCount').textContent = data.weeks.filter(w=>w.status==='done').length;
+    document.getElementById('growthCount').textContent = data.ideas.filter(i=>i.type==='growth').length;
+    document.getElementById('reviewCount').textContent = data.ideas.filter(i=>i.type==='review').length;
+  }
+ 
+  // ── 메모 ──
+  const memoEl = document.getElementById('memoArea');
+  memoEl.value = data.memo;
+  memoEl.addEventListener('input', () => { data.memo = memoEl.value; save(); });
+ 
+  renderIdeas(); renderChecks(); renderWeeks();
+</script>
+</body>
+</html>
+ 
