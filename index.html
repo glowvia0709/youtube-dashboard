@@ -7,358 +7,252 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root {
-    --cream: #FAF7F2;
-    --warm-white: #FDF9F4;
-    --sand: #E8DDD0;
-    --terracotta: #C4714A;
-    --terracotta-light: #D4896A;
-    --terracotta-pale: #F2E8E0;
-    --forest: #3D5A47;
-    --forest-light: #527A60;
-    --forest-pale: #E4EDE7;
-    --charcoal: #2C2C2C;
-    --mid-gray: #7A7A7A;
-    --light-gray: #B8B8B8;
-    --gold: #C9A84C;
-    --gold-pale: #F5EDD8;
+    --cream: #FAF7F2; --warm-white: #FDF9F4; --sand: #E8DDD0;
+    --terracotta: #C4714A; --terracotta-light: #D4896A; --terracotta-pale: #F2E8E0;
+    --forest: #3D5A47; --forest-pale: #E4EDE7;
+    --charcoal: #2C2C2C; --mid-gray: #7A7A7A; --light-gray: #B8B8B8;
+    --gold: #C9A84C; --gold-pale: #F5EDD8; --blue: #4A7BC4;
+    --edit-color: #6C63FF;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--cream);
-    font-family: 'Noto Sans KR', sans-serif;
-    color: var(--charcoal);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--cream); font-family:'Noto Sans KR',sans-serif; color:var(--charcoal); min-height:100vh; }
  
+  /* EDIT MODE */
+  body.edit-mode [contenteditable] {
+    outline: 2px dashed var(--edit-color);
+    border-radius: 6px;
+    padding: 2px 6px;
+    background: rgba(108,99,255,0.05);
+    cursor: text;
+  }
+  body.edit-mode .edit-only { display: flex !important; }
+  body.edit-mode .delete-btn { display: flex !important; }
+  .edit-only { display: none !important; }
+  .delete-btn { display: none !important; }
+ 
+  /* EDIT TOGGLE BTN */
+  .edit-toggle {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--charcoal); color: white;
+    border: none; font-size: 20px; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .edit-toggle:hover { transform: scale(1.08); }
+  body.edit-mode .edit-toggle { background: var(--edit-color); }
+ 
+  /* EDIT BANNER */
+  .edit-banner {
+    display: none;
+    background: var(--edit-color);
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  body.edit-mode .edit-banner { display: block; }
+ 
+  /* HEADER */
   header {
-    background: var(--charcoal);
-    padding: 28px 40px 24px;
-    position: relative;
-    overflow: hidden;
+    background: var(--charcoal); padding: 28px 40px 24px;
+    position: relative; overflow: hidden;
   }
   header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: var(--terracotta);
-    opacity: 0.15;
-  }
-  header::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: 30%;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: var(--forest);
-    opacity: 0.2;
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:200px; height:200px; border-radius:50%;
+    background:var(--terracotta); opacity:0.15;
   }
   .header-inner {
-    max-width: 960px;
-    margin: 0 auto;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    position: relative;
-    z-index: 1;
+    max-width: 960px; margin: 0 auto;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    position: relative; z-index: 1; flex-wrap: wrap; gap: 12px;
   }
-  .channel-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 32px;
-    color: var(--cream);
-    line-height: 1.1;
-    letter-spacing: -0.5px;
-  }
-  .channel-title span { font-style: italic; color: var(--terracotta-light); }
-  .channel-sub {
-    font-size: 12px;
-    color: var(--light-gray);
-    margin-top: 6px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 300;
-  }
-  .dday-badge { text-align: right; }
-  .dday-num {
-    font-family: 'DM Serif Display', serif;
-    font-size: 48px;
-    color: var(--terracotta-light);
-    line-height: 1;
-  }
-  .dday-label { font-size: 11px; color: var(--light-gray); letter-spacing: 1.5px; text-transform: uppercase; }
-  .dday-date { font-size: 11px; color: #666; margin-top: 2px; }
+  .channel-title { font-family:'DM Serif Display',serif; font-size:32px; color:var(--cream); line-height:1.1; }
+  .channel-title span { font-style:italic; color:var(--terracotta-light); }
+  .channel-sub { font-size:12px; color:var(--light-gray); margin-top:6px; letter-spacing:2px; text-transform:uppercase; font-weight:300; }
+  .dday-badge { text-align:right; }
+  .dday-num { font-family:'DM Serif Display',serif; font-size:48px; color:var(--terracotta-light); line-height:1; }
+  .dday-label { font-size:11px; color:var(--light-gray); letter-spacing:1.5px; text-transform:uppercase; }
+  .dday-date { font-size:11px; color:#666; margin-top:2px; }
  
-  main { max-width: 960px; margin: 0 auto; padding: 32px 20px 60px; }
+  main { max-width:960px; margin:0 auto; padding:28px 20px 100px; }
  
   .section-label {
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--mid-gray);
-    margin-bottom: 14px;
-    font-weight: 500;
+    font-size:10px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--mid-gray); margin-bottom:12px; font-weight:500;
   }
  
+  /* CONCEPT CARD */
   .concept-card {
-    background: var(--charcoal);
-    border-radius: 16px;
-    padding: 28px 32px;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.5s ease 0.1s both;
+    background:var(--charcoal); border-radius:16px; padding:24px 28px;
+    margin-bottom:20px; position:relative; overflow:hidden;
   }
   .concept-card::after {
-    content: '👶';
-    position: absolute;
-    right: 28px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 52px;
-    opacity: 0.2;
+    content:'👶'; position:absolute; right:28px; top:50%;
+    transform:translateY(-50%); font-size:52px; opacity:0.15; pointer-events:none;
   }
-  .concept-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    color: var(--cream);
-    margin-bottom: 10px;
+  .concept-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--cream); margin-bottom:12px; min-width:20px; }
+  .concept-sub { font-size:12px; color:#aaa; margin-bottom:12px; min-width:20px; }
+  .concept-pills { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pill {
+    padding:5px 14px; border-radius:100px; font-size:12px; font-weight:500;
+    display:flex; align-items:center; gap:6px;
   }
-  .concept-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-  .pill { padding: 5px 14px; border-radius: 100px; font-size: 12px; font-weight: 500; }
-  .pill-terra { background: var(--terracotta); color: white; }
-  .pill-forest { background: var(--forest); color: white; }
-  .pill-gold { background: var(--gold); color: white; }
-  .pill-blue { background: #4A7BC4; color: white; }
-  .pill-outline { border: 1px solid #555; color: var(--light-gray); }
+  .pill-terra { background:var(--terracotta); color:white; }
+  .pill-forest { background:var(--forest); color:white; }
+  .pill-gold { background:var(--gold); color:white; }
+  .pill-blue { background:var(--blue); color:white; }
+  .pill-outline { border:1px solid #555; color:var(--light-gray); }
  
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  @media (max-width: 600px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    header { padding: 20px; }
-    .channel-title { font-size: 22px; }
-    .dday-num { font-size: 36px; }
-    .header-inner { flex-direction: column; gap: 12px; align-items: flex-start; }
-    .dday-badge { text-align: left; }
+  /* ADD PILL BTN */
+  .add-pill-btn {
+    padding:5px 12px; border-radius:100px; font-size:11px; font-weight:600;
+    background:transparent; border:1px dashed #555; color:#888; cursor:pointer;
   }
  
-  .card {
-    background: white;
-    border-radius: 16px;
-    padding: 22px 24px;
-    border: 1px solid var(--sand);
+  /* GRID */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media(max-width:600px) {
+    .grid-2 { grid-template-columns:1fr; }
+    header { padding:20px; }
+    .channel-title { font-size:22px; }
+    .dday-num { font-size:36px; }
+    .edit-toggle { bottom:16px; right:16px; }
   }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--charcoal);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card-icon {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .icon-terra { background: var(--terracotta-pale); }
-  .icon-forest { background: var(--forest-pale); }
-  .icon-gold { background: var(--gold-pale); }
  
-  .upload-week { display: flex; flex-direction: column; gap: 10px; }
-  .week-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .week-num { width: 48px; color: var(--mid-gray); font-size: 11px; flex-shrink: 0; }
-  .week-bar-wrap { flex: 1; height: 6px; background: var(--sand); border-radius: 10px; overflow: hidden; }
-  .week-bar { height: 100%; border-radius: 10px; background: var(--terracotta); transition: width 0.6s ease; }
-  .week-status { width: 60px; text-align: right; font-size: 11px; flex-shrink: 0; cursor: pointer; }
-  .status-done { color: var(--forest); font-weight: 600; }
-  .status-plan { color: var(--gold); }
-  .status-todo { color: var(--light-gray); }
+  /* CARD */
+  .card { background:white; border-radius:16px; padding:20px 22px; border:1px solid var(--sand); }
+  .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .card-title { font-size:13px; font-weight:600; color:var(--charcoal); display:flex; align-items:center; gap:8px; }
+  .card-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .icon-terra { background:var(--terracotta-pale); }
+  .icon-forest { background:var(--forest-pale); }
+  .icon-gold { background:var(--gold-pale); }
  
-  .idea-list { display: flex; flex-direction: column; gap: 7px; }
+  /* STATS */
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  .stat-card { background:white; border:1px solid var(--sand); border-radius:14px; padding:16px 18px; text-align:center; }
+  .stat-num { font-family:'DM Serif Display',serif; font-size:28px; color:var(--charcoal); line-height:1; margin-bottom:4px; }
+  .stat-label { font-size:11px; color:var(--mid-gray); }
+ 
+  /* UPLOAD TRACKER */
+  .week-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .week-num { width:40px; font-size:11px; color:var(--mid-gray); flex-shrink:0; }
+  .week-bar-wrap { flex:1; height:6px; background:var(--sand); border-radius:10px; overflow:hidden; }
+  .week-bar { height:100%; border-radius:10px; background:var(--terracotta); transition:width 0.4s; }
+  .week-status { width:52px; text-align:right; font-size:11px; cursor:pointer; flex-shrink:0; }
+  .status-done { color:var(--forest); font-weight:600; }
+  .status-plan { color:var(--gold); }
+  .status-todo { color:var(--light-gray); }
+  .week-delete { width:18px; flex-shrink:0; }
+ 
+  /* IDEAS */
   .idea-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 9px 11px;
-    border-radius: 10px;
-    background: var(--warm-white);
-    border: 1px solid var(--sand);
-    transition: all 0.2s;
+    display:flex; align-items:flex-start; gap:8px;
+    padding:8px 10px; border-radius:10px;
+    background:var(--warm-white); border:1px solid var(--sand);
+    margin-bottom:6px;
   }
-  .idea-item:hover { border-color: var(--terracotta); background: var(--terracotta-pale); }
   .idea-type {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 100px;
-    font-weight: 600;
-    flex-shrink: 0;
-    margin-top: 1px;
+    font-size:10px; padding:2px 7px; border-radius:100px;
+    font-weight:600; flex-shrink:0; margin-top:2px;
   }
-  .type-growth { background: var(--forest-pale); color: var(--forest); }
-  .type-review { background: var(--terracotta-pale); color: var(--terracotta); }
-  .idea-text { font-size: 12px; line-height: 1.4; color: var(--charcoal); }
+  .type-growth { background:var(--forest-pale); color:var(--forest); }
+  .type-review { background:var(--terracotta-pale); color:var(--terracotta); }
+  .idea-text { font-size:12px; line-height:1.5; flex:1; min-width:0; word-break:break-all; }
  
-  .check-list { display: flex; flex-direction: column; gap: 2px; }
+  /* CHECKLIST */
   .check-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--cream);
-    cursor: pointer;
-    user-select: none;
-    transition: opacity 0.2s;
+    display:flex; align-items:center; gap:10px;
+    padding:8px 0; border-bottom:1px solid var(--cream);
+    cursor:pointer; user-select:none;
   }
-  .check-item:last-child { border-bottom: none; }
+  .check-item:last-child { border-bottom:none; }
   .check-box {
-    width: 18px; height: 18px;
-    border-radius: 5px;
-    border: 2px solid var(--sand);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    font-size: 11px;
+    width:18px; height:18px; border-radius:5px;
+    border:2px solid var(--sand); display:flex; align-items:center;
+    justify-content:center; flex-shrink:0; transition:all 0.2s; font-size:11px;
   }
-  .check-item.checked .check-box { background: var(--forest); border-color: var(--forest); color: white; }
-  .check-item.checked .check-text { text-decoration: line-through; color: var(--light-gray); }
+  .check-item.checked .check-box { background:var(--forest); border-color:var(--forest); color:white; }
+  .check-item.checked .check-text { text-decoration:line-through; color:var(--light-gray); }
+  .check-text { font-size:13px; flex:1; }
  
-  .next-video-card {
-    background: linear-gradient(135deg, var(--terracotta-pale) 0%, var(--gold-pale) 100%);
-    border-radius: 16px;
-    padding: 24px 28px;
-    border: 1px solid var(--sand);
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.5s ease 0.2s both;
+  /* LINKS */
+  .link-item {
+    display:flex; align-items:center; gap:8px;
+    padding:9px 12px; border-radius:10px;
+    background:var(--warm-white); border:1px solid var(--sand);
+    margin-bottom:6px; text-decoration:none; color:var(--charcoal);
+    transition:all 0.2s;
   }
-  .next-video-card::before {
-    content: '▶';
-    position: absolute;
-    right: 20px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 60px;
-    color: var(--terracotta);
-    opacity: 0.08;
-  }
-  .next-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--terracotta); margin-bottom: 6px; font-weight: 600; }
-  .next-title { font-family: 'Noto Serif KR', serif; font-size: 20px; color: var(--charcoal); font-weight: 600; margin-bottom: 12px; }
-  .next-meta { display: flex; gap: 16px; flex-wrap: wrap; }
-  .meta-chip { font-size: 12px; color: var(--mid-gray); display: flex; align-items: center; gap: 4px; }
-  .progress-bar-wrap { margin-top: 14px; height: 4px; background: rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden; }
-  .progress-bar { height: 100%; background: var(--terracotta); border-radius: 10px; width: 20%; }
-  .progress-text { font-size: 11px; color: var(--mid-gray); margin-top: 6px; text-align: right; }
+  .link-item:hover { border-color:var(--terracotta); background:var(--terracotta-pale); }
+  .link-icon { font-size:16px; flex-shrink:0; }
+  .link-info { flex:1; min-width:0; }
+  .link-label { font-size:12px; font-weight:600; display:block; }
+  .link-url { font-size:10px; color:var(--mid-gray); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
  
-  .add-idea-wrap { display: flex; gap: 8px; margin-top: 12px; }
-  .add-idea-input {
-    flex: 1;
-    padding: 9px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--sand);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    outline: none;
-    background: var(--warm-white);
-    color: var(--charcoal);
-    transition: border 0.2s;
+  /* MEMO */
+  .memo-area {
+    width:100%; min-height:120px; border:none; outline:none;
+    background:transparent; font-family:inherit; font-size:13px;
+    color:var(--charcoal); resize:none; line-height:1.8;
   }
-  .add-idea-input:focus { border-color: var(--terracotta); }
-  .add-idea-input::placeholder { color: var(--light-gray); }
+  .memo-area::placeholder { color:var(--light-gray); }
+ 
+  /* ADD INPUT ROW */
+  .add-row { display:flex; gap:6px; margin-top:10px; }
+  .add-input {
+    flex:1; padding:8px 12px; border-radius:10px;
+    border:1px solid var(--sand); font-family:inherit; font-size:12px;
+    outline:none; background:var(--warm-white); color:var(--charcoal);
+  }
+  .add-input:focus { border-color:var(--edit-color); }
+  .add-input::placeholder { color:var(--light-gray); }
   .type-select {
-    padding: 9px 10px;
-    border-radius: 10px;
-    border: 1px solid var(--sand);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 12px;
-    background: var(--warm-white);
-    color: var(--charcoal);
-    outline: none;
+    padding:8px 8px; border-radius:10px; border:1px solid var(--sand);
+    font-family:inherit; font-size:12px; background:var(--warm-white); outline:none;
   }
   .add-btn {
-    padding: 9px 16px;
-    background: var(--terracotta);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Noto Sans KR', sans-serif;
-    transition: background 0.2s;
+    padding:8px 14px; background:var(--edit-color); color:white;
+    border:none; border-radius:10px; font-size:14px; font-weight:700;
+    cursor:pointer; font-family:inherit;
   }
-  .add-btn:hover { background: var(--terracotta-light); }
+  .small-btn {
+    padding:4px 10px; border-radius:8px; font-size:11px; font-weight:600;
+    cursor:pointer; border:none; font-family:inherit;
+  }
+  .btn-add-week { background:var(--forest-pale); color:var(--forest); }
+  .btn-remove-week { background:var(--terracotta-pale); color:var(--terracotta); }
  
-  .memo-area {
-    width: 100%;
-    min-height: 100px;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    color: var(--charcoal);
-    resize: none;
-    line-height: 1.8;
+  /* DELETE BTN */
+  .delete-btn {
+    width:18px; height:18px; border-radius:50%; background:#fee; border:1px solid #fcc;
+    color:#c55; font-size:10px; cursor:pointer; flex-shrink:0;
+    align-items:center; justify-content:center; font-weight:700;
   }
-  .memo-area::placeholder { color: var(--light-gray); }
- 
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-    animation: fadeUp 0.5s ease 0.3s both;
-  }
-  .stat-card {
-    background: white;
-    border: 1px solid var(--sand);
-    border-radius: 14px;
-    padding: 16px 18px;
-    text-align: center;
-  }
-  .stat-num {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--charcoal);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .stat-label { font-size: 11px; color: var(--mid-gray); }
  
   .footer-note {
-    text-align: center;
-    font-size: 12px;
-    color: var(--light-gray);
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid var(--sand);
+    text-align:center; font-size:12px; color:var(--light-gray);
+    margin-top:40px; padding-top:20px; border-top:1px solid var(--sand);
   }
  
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .concept-card { animation: fadeUp 0.5s ease 0.1s both; }
-  .grid-2 { animation: fadeUp 0.5s ease 0.4s both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .concept-card,.stats-row,.grid-2,.card { animation:fadeUp 0.4s ease both; }
 </style>
 </head>
 <body>
  
+<div class="edit-banner">✏️ 편집 모드 ON — 텍스트를 클릭하면 바로 수정할 수 있어요</div>
+ 
 <header>
   <div class="header-inner">
     <div>
-      <div class="channel-title">아빠의 <span>기록</span></div>
-      <div class="channel-sub">육아 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스</div>
+      <div class="channel-title">아빠의 <span contenteditable="false" id="titleAccent">기록</span></div>
+      <div class="channel-sub" contenteditable="false" id="channelSub">아들 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스</div>
     </div>
     <div class="dday-badge">
       <div class="dday-num" id="ddayNum">D-?</div>
@@ -370,204 +264,357 @@
  
 <main>
  
+  <!-- 채널 컨셉 -->
   <div class="section-label">채널 컨셉</div>
   <div class="concept-card">
-    <div class="concept-title">아들의 하루하루를 아빠의 시선으로 기록합니다 💙</div>
-    <div class="concept-pills">
-      <span class="pill pill-blue">👶 아들 성장 기록</span>
-      <span class="pill pill-terra">🛒 솔직 육아용품 리뷰</span>
-      <span class="pill pill-gold">📅 주 1회 업로드 목표</span>
-      <span class="pill pill-outline">타겟: 예비·초보 부모</span>
-    </div>
+    <div class="concept-title" contenteditable="false" id="conceptTitle">아들의 하루하루를 아빠의 시선으로 기록합니다 💙</div>
+    <div class="concept-sub" contenteditable="false" id="conceptSub">타겟: 예비·초보 부모 · 주 1회 업로드 목표</div>
+    <div class="concept-pills" id="conceptPills"></div>
   </div>
  
-  <div class="section-label">다음 업로드 예정 영상</div>
-  <div class="next-video-card">
-    <div class="next-label">NEXT VIDEO</div>
-    <div class="next-title">채널 첫 영상 — 아빠가 된다는 것</div>
-    <div class="next-meta">
-      <span class="meta-chip">🏷️ 성장 기록</span>
-      <span class="meta-chip">📝 기획 중</span>
-    </div>
-    <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
-    <div class="progress-text">기획 20% 완료</div>
-  </div>
- 
+  <!-- 스탯 -->
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-num" id="totalCount">0</div>
-      <div class="stat-label">총 업로드</div>
+      <div class="stat-label">총 업로드 완료</div>
     </div>
     <div class="stat-card">
       <div class="stat-num" id="growthCount">0</div>
-      <div class="stat-label">성장 기록</div>
+      <div class="stat-label">성장 기록 아이디어</div>
     </div>
     <div class="stat-card">
       <div class="stat-num" id="reviewCount">0</div>
-      <div class="stat-label">용품 리뷰</div>
+      <div class="stat-label">용품 리뷰 아이디어</div>
     </div>
   </div>
  
+  <!-- 트래커 + 아이디어 -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-title">
-        <div class="card-icon icon-terra">📅</div>
-        업로드 일정 트래커
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-icon icon-terra">📅</div>
+          업로드 일정 트래커
+        </div>
+        <div class="edit-only" style="gap:6px;">
+          <button class="small-btn btn-add-week" onclick="addWeek()">+ 주차</button>
+          <button class="small-btn btn-remove-week" onclick="removeWeek()">- 주차</button>
+        </div>
       </div>
-      <div class="upload-week" id="weekTracker"></div>
+      <div id="weekTracker"></div>
     </div>
  
     <div class="card">
-      <div class="card-title">
-        <div class="card-icon icon-gold">💡</div>
-        영상 아이디어 보드
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-icon icon-gold">💡</div>
+          영상 아이디어 보드
+        </div>
       </div>
-      <div class="idea-list" id="ideaList"></div>
-      <div class="add-idea-wrap">
+      <div id="ideaList"></div>
+      <div class="add-row edit-only">
         <select class="type-select" id="ideaType">
           <option value="growth">성장기록</option>
           <option value="review">용품리뷰</option>
         </select>
-        <input class="add-idea-input" id="ideaInput" placeholder="새 아이디어 입력..." />
+        <input class="add-input" id="ideaInput" placeholder="새 아이디어..." />
         <button class="add-btn" onclick="addIdea()">+</button>
       </div>
     </div>
   </div>
  
+  <!-- 체크리스트 + 링크 -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-title">
-        <div class="card-icon icon-forest">✅</div>
-        채널 개설 체크리스트
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-icon icon-forest">✅</div>
+          채널 개설 체크리스트
+        </div>
       </div>
-      <div class="check-list" id="checkList"></div>
+      <div id="checkList"></div>
+      <div class="add-row edit-only">
+        <input class="add-input" id="checkInput" placeholder="새 항목 추가..." />
+        <button class="add-btn" onclick="addCheck()">+</button>
+      </div>
     </div>
  
     <div class="card">
-      <div class="card-title">
-        <div class="card-icon icon-gold">📝</div>
-        빠른 메모
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-icon icon-gold">🔗</div>
+          유용한 링크
+        </div>
       </div>
-      <textarea class="memo-area" id="memoArea" placeholder="채널 운영 아이디어, 기억할 것들을 자유롭게 적어두세요..."></textarea>
+      <div id="linkList"></div>
+      <div class="add-row edit-only" style="flex-direction:column; gap:6px;">
+        <div style="display:flex;gap:6px;">
+          <input class="add-input" id="linkEmoji" placeholder="아이콘(예:📺)" style="width:70px;flex:none;" />
+          <input class="add-input" id="linkLabel" placeholder="링크 이름" />
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input class="add-input" id="linkUrl" placeholder="https://..." />
+          <button class="add-btn" onclick="addLink()">+</button>
+        </div>
+      </div>
     </div>
+  </div>
+ 
+  <!-- 메모 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title" style="margin-bottom:12px;">
+      <div class="card-icon icon-gold">📝</div>
+      빠른 메모
+    </div>
+    <textarea class="memo-area" id="memoArea" placeholder="채널 운영 아이디어, 기억할 것들을 자유롭게 적어두세요..."></textarea>
   </div>
  
   <div class="footer-note">아빠의 기록 · 유튜브 채널 워크스페이스 · 호겸님 전용 💙</div>
 </main>
  
+<!-- 편집 토글 버튼 -->
+<button class="edit-toggle" onclick="toggleEdit()" title="편집 모드">✏️</button>
+ 
 <script>
-  // ── D-DAY (2026년 9월 12일 기준) ──
-  function calcDday() {
+  // ── D-DAY ──
+  (function() {
     const due = new Date('2026-09-12T00:00:00');
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const diff = Math.round((due - today) / (1000*60*60*24));
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((due - today) / 86400000);
     const el = document.getElementById('ddayNum');
-    if (diff > 0) el.textContent = 'D-' + diff;
-    else if (diff === 0) el.textContent = '🎉 오늘!';
-    else el.textContent = 'D+' + Math.abs(diff);
+    el.textContent = diff > 0 ? 'D-'+diff : diff === 0 ? '🎉 오늘!' : 'D+'+Math.abs(diff);
+  })();
+ 
+  // ── DATA ──
+  const KEY = 'ytDash_v3';
+  let D = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+    titleAccent: '기록',
+    channelSub: '아들 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스',
+    conceptTitle: '아들의 하루하루를 아빠의 시선으로 기록합니다 💙',
+    conceptSub: '타겟: 예비·초보 부모 · 주 1회 업로드 목표',
+    pills: [
+      { text:'👶 아들 성장 기록', cls:'pill-blue' },
+      { text:'🛒 솔직 육아용품 리뷰', cls:'pill-terra' },
+      { text:'📅 주 1회 업로드', cls:'pill-gold' },
+    ],
+    ideas: [
+      { type:'growth', text:'태교 여행 브이로그 — 출산 전 마지막 둘만의 여행', id:1 },
+      { type:'growth', text:'아기방 꾸미기 과정 타임랩스', id:2 },
+      { type:'review', text:'유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)', id:3 },
+      { type:'review', text:'아기 모니터, 진짜 필요한가? 써보니까...', id:4 },
+      { type:'growth', text:'신생아 첫날 — 아빠가 처음 안아봤을 때', id:5 },
+    ],
+    checks: [
+      { text:'유튜브 채널 계정 생성', done:false },
+      { text:'채널 이름 & 핸들 확정', done:false },
+      { text:'채널 아트 & 프로필 사진 제작', done:false },
+      { text:'채널 소개글 작성', done:false },
+      { text:'첫 영상 촬영 및 편집 완료', done:false },
+      { text:'업로드 스케줄 공개', done:false },
+      { text:'쇼츠 연동 계획 수립', done:false },
+    ],
+    links: [
+      { emoji:'📺', label:'내 유튜브 채널', url:'https://youtube.com' },
+      { emoji:'📊', label:'유튜브 스튜디오', url:'https://studio.youtube.com' },
+    ],
+    memo: '',
+    weeks: Array(8).fill(null).map((_,i)=>({ week:i+1, status:'todo' })),
+  };
+ 
+  function save() { localStorage.setItem(KEY, JSON.stringify(D)); }
+ 
+  // ── EDIT MODE ──
+  let editMode = false;
+  function toggleEdit() {
+    editMode = !editMode;
+    document.body.classList.toggle('edit-mode', editMode);
+    document.querySelector('.edit-toggle').textContent = editMode ? '💾' : '✏️';
+    document.querySelector('.edit-toggle').title = editMode ? '저장' : '편집 모드';
+ 
+    // contenteditable 토글
+    ['titleAccent','channelSub','conceptTitle','conceptSub'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.contentEditable = editMode ? 'true' : 'false';
+    });
+ 
+    if (!editMode) {
+      // 저장
+      ['titleAccent','channelSub','conceptTitle','conceptSub'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) D[id] = el.textContent.trim();
+      });
+      save();
+    }
   }
-  calcDday();
  
-  // ── 데이터 ──
-  let data = JSON.parse(localStorage.getItem('ytWorkspace_v2') || '{}');
-  if (!data.ideas) data.ideas = [
-    { type: 'growth', text: '태교 여행 브이로그 — 출산 전 마지막 둘만의 여행', id: 1 },
-    { type: 'growth', text: '아기방 꾸미기 과정 타임랩스', id: 2 },
-    { type: 'review', text: '유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)', id: 3 },
-    { type: 'review', text: '아기 모니터, 진짜 필요한가? 써보니까...', id: 4 },
-    { type: 'growth', text: '신생아 첫날 — 아빠가 처음 안아봤을 때', id: 5 },
-  ];
-  if (!data.checks) data.checks = [
-    { text: '유튜브 채널 계정 생성', done: false },
-    { text: '채널 이름 & 핸들 확정', done: false },
-    { text: '채널 아트 & 프로필 사진 제작', done: false },
-    { text: '채널 소개글 작성', done: false },
-    { text: '첫 영상 촬영 및 편집 완료', done: false },
-    { text: '업로드 스케줄 공개', done: false },
-    { text: '쇼츠 연동 계획 수립', done: false },
-  ];
-  if (!data.memo) data.memo = '';
-  if (!data.weeks) data.weeks = Array(8).fill(null).map((_,i)=>({ week: i+1, status: 'todo' }));
+  // ── PILLS ──
+  function renderPills() {
+    const el = document.getElementById('conceptPills');
+    el.innerHTML = '';
+    D.pills.forEach((p, i) => {
+      const span = document.createElement('span');
+      span.className = 'pill ' + p.cls;
+      span.textContent = p.text;
+      if (editMode) {
+        const del = document.createElement('button');
+        del.style.cssText = 'background:rgba(255,255,255,0.3);border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;color:white;font-weight:700;line-height:1;padding:0;';
+        del.textContent = '×';
+        del.onclick = () => { D.pills.splice(i,1); save(); renderPills(); };
+        span.appendChild(del);
+      }
+      el.appendChild(span);
+    });
+    if (editMode) {
+      const btn = document.createElement('button');
+      btn.className = 'add-pill-btn';
+      btn.textContent = '+ 태그 추가';
+      btn.onclick = () => {
+        const text = prompt('태그 내용 입력:');
+        if (!text) return;
+        const colors = ['pill-terra','pill-forest','pill-gold','pill-blue','pill-outline'];
+        const cls = colors[D.pills.length % colors.length];
+        D.pills.push({ text, cls });
+        save(); renderPills();
+      };
+      el.appendChild(btn);
+    }
+  }
  
-  function save() { localStorage.setItem('ytWorkspace_v2', JSON.stringify(data)); }
+  // ── WEEKS ──
+  function renderWeeks() {
+    const el = document.getElementById('weekTracker');
+    el.innerHTML = '';
+    D.weeks.forEach((w, i) => {
+      const pct = w.status==='done'?100:w.status==='plan'?50:0;
+      const cls = w.status==='done'?'status-done':w.status==='plan'?'status-plan':'status-todo';
+      const lbl = w.status==='done'?'완료 ✓':w.status==='plan'?'기획중':'—';
+      const row = document.createElement('div');
+      row.className = 'week-row';
+      row.innerHTML = `
+        <span class="week-num">W${w.week}</span>
+        <div class="week-bar-wrap"><div class="week-bar" style="width:${pct}%"></div></div>
+        <span class="week-status ${cls}" onclick="cycleWeek(${i})">${lbl}</span>
+        <button class="delete-btn" onclick="deleteWeek(${i})">×</button>
+      `;
+      el.appendChild(row);
+    });
+    updateStats();
+  }
+  window.cycleWeek = (i) => {
+    const s=['todo','plan','done'];
+    D.weeks[i].status = s[(s.indexOf(D.weeks[i].status)+1)%3];
+    save(); renderWeeks();
+  };
+  window.deleteWeek = (i) => { D.weeks.splice(i,1); save(); renderWeeks(); };
+  window.addWeek = () => { D.weeks.push({ week: D.weeks.length+1, status:'todo' }); save(); renderWeeks(); };
+  window.removeWeek = () => { if(D.weeks.length>1){ D.weeks.pop(); save(); renderWeeks(); } };
  
-  // ── 아이디어 ──
+  // ── IDEAS ──
   function renderIdeas() {
     const el = document.getElementById('ideaList');
     el.innerHTML = '';
-    data.ideas.slice(0,5).forEach(idea => {
+    D.ideas.forEach((idea, i) => {
       const div = document.createElement('div');
       div.className = 'idea-item';
       div.innerHTML = `
         <span class="idea-type ${idea.type==='growth'?'type-growth':'type-review'}">${idea.type==='growth'?'성장':'리뷰'}</span>
         <span class="idea-text">${idea.text}</span>
+        <button class="delete-btn" onclick="deleteIdea(${i})">×</button>
       `;
       el.appendChild(div);
     });
     updateStats();
   }
-  function addIdea() {
+  window.addIdea = () => {
     const input = document.getElementById('ideaInput');
     const type = document.getElementById('ideaType').value;
     if (!input.value.trim()) return;
-    data.ideas.unshift({ type, text: input.value.trim(), id: Date.now() });
+    D.ideas.unshift({ type, text:input.value.trim(), id:Date.now() });
     input.value = '';
     save(); renderIdeas();
-  }
+  };
+  window.deleteIdea = (i) => { D.ideas.splice(i,1); save(); renderIdeas(); };
   document.getElementById('ideaInput').addEventListener('keydown', e => { if(e.key==='Enter') addIdea(); });
  
-  // ── 체크리스트 ──
+  // ── CHECKS ──
   function renderChecks() {
     const el = document.getElementById('checkList');
     el.innerHTML = '';
-    data.checks.forEach((c, i) => {
+    D.checks.forEach((c, i) => {
       const div = document.createElement('div');
-      div.className = 'check-item' + (c.done ? ' checked' : '');
-      div.innerHTML = `<div class="check-box">${c.done?'✓':''}</div><span class="check-text">${c.text}</span>`;
-      div.addEventListener('click', () => { data.checks[i].done = !data.checks[i].done; save(); renderChecks(); });
-      el.appendChild(div);
-    });
-  }
- 
-  // ── 트래커 ──
-  function renderWeeks() {
-    const el = document.getElementById('weekTracker');
-    el.innerHTML = '';
-    data.weeks.forEach((w, i) => {
-      const pct = w.status==='done'?100:w.status==='plan'?50:0;
-      const cls = w.status==='done'?'status-done':w.status==='plan'?'status-plan':'status-todo';
-      const lbl = w.status==='done'?'완료 ✓':w.status==='plan'?'기획중':'—';
-      const div = document.createElement('div');
-      div.className = 'week-row';
+      div.className = 'check-item' + (c.done?' checked':'');
       div.innerHTML = `
-        <span class="week-num">W${w.week}</span>
-        <div class="week-bar-wrap"><div class="week-bar" style="width:${pct}%"></div></div>
-        <span class="week-status ${cls}" onclick="cycleWeek(${i})">${lbl}</span>
+        <div class="check-box">${c.done?'✓':''}</div>
+        <span class="check-text">${c.text}</span>
+        <button class="delete-btn" onclick="event.stopPropagation();deleteCheck(${i})">×</button>
       `;
+      div.addEventListener('click', () => { D.checks[i].done=!D.checks[i].done; save(); renderChecks(); });
       el.appendChild(div);
     });
-    updateStats();
   }
-  window.cycleWeek = function(i) {
-    const s = ['todo','plan','done'];
-    data.weeks[i].status = s[(s.indexOf(data.weeks[i].status)+1)%3];
-    save(); renderWeeks();
+  window.addCheck = () => {
+    const input = document.getElementById('checkInput');
+    if (!input.value.trim()) return;
+    D.checks.push({ text:input.value.trim(), done:false });
+    input.value = '';
+    save(); renderChecks();
   };
+  window.deleteCheck = (i) => { D.checks.splice(i,1); save(); renderChecks(); };
+  document.getElementById('checkInput').addEventListener('keydown', e => { if(e.key==='Enter') addCheck(); });
  
-  // ── 스탯 ──
+  // ── LINKS ──
+  function renderLinks() {
+    const el = document.getElementById('linkList');
+    el.innerHTML = '';
+    D.links.forEach((lk, i) => {
+      const div = document.createElement('div');
+      div.className = 'link-item';
+      div.style.cursor = 'pointer';
+      div.innerHTML = `
+        <span class="link-icon">${lk.emoji||'🔗'}</span>
+        <div class="link-info">
+          <span class="link-label">${lk.label}</span>
+          <span class="link-url">${lk.url}</span>
+        </div>
+        <button class="delete-btn" onclick="event.stopPropagation();deleteLink(${i})">×</button>
+      `;
+      div.addEventListener('click', () => { if(!editMode) window.open(lk.url,'_blank'); });
+      el.appendChild(div);
+    });
+  }
+  window.addLink = () => {
+    const emoji = document.getElementById('linkEmoji').value.trim() || '🔗';
+    const label = document.getElementById('linkLabel').value.trim();
+    const url = document.getElementById('linkUrl').value.trim();
+    if (!label || !url) return;
+    D.links.push({ emoji, label, url: url.startsWith('http')?url:'https://'+url });
+    document.getElementById('linkEmoji').value='';
+    document.getElementById('linkLabel').value='';
+    document.getElementById('linkUrl').value='';
+    save(); renderLinks();
+  };
+  window.deleteLink = (i) => { D.links.splice(i,1); save(); renderLinks(); };
+ 
+  // ── MEMO ──
+  const memoEl = document.getElementById('memoArea');
+  memoEl.value = D.memo;
+  memoEl.addEventListener('input', () => { D.memo = memoEl.value; save(); });
+ 
+  // ── STATS ──
   function updateStats() {
-    document.getElementById('totalCount').textContent = data.weeks.filter(w=>w.status==='done').length;
-    document.getElementById('growthCount').textContent = data.ideas.filter(i=>i.type==='growth').length;
-    document.getElementById('reviewCount').textContent = data.ideas.filter(i=>i.type==='review').length;
+    document.getElementById('totalCount').textContent = D.weeks.filter(w=>w.status==='done').length;
+    document.getElementById('growthCount').textContent = D.ideas.filter(i=>i.type==='growth').length;
+    document.getElementById('reviewCount').textContent = D.ideas.filter(i=>i.type==='review').length;
   }
  
-  // ── 메모 ──
-  const memoEl = document.getElementById('memoArea');
-  memoEl.value = data.memo;
-  memoEl.addEventListener('input', () => { data.memo = memoEl.value; save(); });
+  // ── INIT TEXT ──
+  ['titleAccent','channelSub','conceptTitle','conceptSub'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && D[id]) el.textContent = D[id];
+  });
  
-  renderIdeas(); renderChecks(); renderWeeks();
+  // ── RENDER ALL ──
+  renderPills(); renderWeeks(); renderIdeas(); renderChecks(); renderLinks(); updateStats();
 </script>
 </body>
 </html>
