@@ -1,0 +1,289 @@
+import { useState, useEffect } from "react";
+
+const DUE_DATE = new Date("2026-09-12T00:00:00");
+
+const defaultData = {
+  ideas: [
+    { type: "growth", text: "태교 여행 브이로그 — 출산 전 마지막 둘만의 여행", id: 1 },
+    { type: "growth", text: "아기방 꾸미기 과정 타임랩스", id: 2 },
+    { type: "review", text: "유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)", id: 3 },
+    { type: "review", text: "아기 모니터, 진짜 필요한가? 써보니까...", id: 4 },
+    { type: "growth", text: "신생아 첫날 — 아빠가 처음 안아봤을 때", id: 5 },
+  ],
+  checks: [
+    { text: "유튜브 채널 계정 생성", done: false },
+    { text: "채널 이름 & 핸들 확정", done: false },
+    { text: "채널 아트 & 프로필 사진 제작", done: false },
+    { text: "채널 소개글 작성", done: false },
+    { text: "첫 영상 촬영 및 편집 완료", done: false },
+    { text: "업로드 스케줄 공개", done: false },
+    { text: "쇼츠 연동 계획 수립", done: false },
+  ],
+  memo: "",
+  weeks: Array(8).fill(null).map((_, i) => ({ week: i + 1, status: "todo" })),
+};
+
+function calcDday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((DUE_DATE - today) / (1000 * 60 * 60 * 24));
+  if (diff > 0) return `D-${diff}`;
+  if (diff === 0) return "D-Day!";
+  return `D+${Math.abs(diff)}`;
+}
+
+export default function App() {
+  const [data, setData] = useState(defaultData);
+  const [ideaInput, setIdeaInput] = useState("");
+  const [ideaType, setIdeaType] = useState("growth");
+  const [dday, setDday] = useState(calcDday());
+
+  useEffect(() => {
+    try {
+      const saved = window.storage && window.storage.get
+        ? null // storage API is async, skip for simplicity
+        : null;
+    } catch (e) {}
+    setDday(calcDday());
+  }, []);
+
+  const save = (newData) => setData({ ...newData });
+
+  const addIdea = () => {
+    if (!ideaInput.trim()) return;
+    const newData = {
+      ...data,
+      ideas: [{ type: ideaType, text: ideaInput.trim(), id: Date.now() }, ...data.ideas],
+    };
+    setIdeaInput("");
+    save(newData);
+  };
+
+  const toggleCheck = (i) => {
+    const checks = data.checks.map((c, idx) => idx === i ? { ...c, done: !c.done } : c);
+    save({ ...data, checks });
+  };
+
+  const cycleWeek = (i) => {
+    const states = ["todo", "plan", "done"];
+    const weeks = data.weeks.map((w, idx) =>
+      idx === i ? { ...w, status: states[(states.indexOf(w.status) + 1) % 3] } : w
+    );
+    save({ ...data, weeks });
+  };
+
+  const totalDone = data.weeks.filter(w => w.status === "done").length;
+  const growthCount = data.ideas.filter(i => i.type === "growth").length;
+  const reviewCount = data.ideas.filter(i => i.type === "review").length;
+
+  return (
+    <div style={{ fontFamily: "'Noto Sans KR', sans-serif", background: "#FAF7F2", minHeight: "100vh", color: "#2C2C2C" }}>
+
+      {/* HEADER */}
+      <div style={{
+        background: "#2C2C2C", padding: "24px 32px",
+        position: "relative", overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute", top: -50, right: -50,
+          width: 180, height: 180, borderRadius: "50%",
+          background: "#C4714A", opacity: 0.15
+        }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 28, color: "#FAF7F2", fontWeight: 700, letterSpacing: -0.5 }}>
+              아빠의 <span style={{ color: "#D4896A", fontStyle: "italic" }}>기록</span>
+            </div>
+            <div style={{ fontSize: 11, color: "#888", marginTop: 5, letterSpacing: 2, textTransform: "uppercase" }}>
+              아들 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 44, color: "#D4896A", fontWeight: 700, lineHeight: 1 }}>{dday}</div>
+            <div style={{ fontSize: 11, color: "#888", letterSpacing: 1 }}>아들 출산 예정일까지</div>
+            <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>2026년 9월 12일</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "28px 20px 60px" }}>
+
+        {/* 채널 컨셉 */}
+        <Label text="채널 컨셉" />
+        <div style={{
+          background: "#2C2C2C", borderRadius: 16, padding: "24px 28px",
+          marginBottom: 20, position: "relative", overflow: "hidden"
+        }}>
+          <div style={{ position: "absolute", right: 24, top: "50%", transform: "translateY(-50%)", fontSize: 48, opacity: 0.12 }}>👶</div>
+          <div style={{ fontSize: 18, color: "#FAF7F2", fontWeight: 600, marginBottom: 12 }}>
+            아들의 하루하루를 아빠의 시선으로 기록합니다 💙
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Pill color="#4A7BC4">👶 아들 성장 기록</Pill>
+            <Pill color="#C4714A">🛒 솔직 육아용품 리뷰</Pill>
+            <Pill color="#C9A84C">📅 주 1회 업로드 목표</Pill>
+            <Pill color="#555" textColor="#aaa">타겟: 예비·초보 부모</Pill>
+          </div>
+        </div>
+
+        {/* 스탯 */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
+          <StatCard num={totalDone} label="총 업로드" />
+          <StatCard num={growthCount} label="성장 기록 아이디어" />
+          <StatCard num={reviewCount} label="용품 리뷰 아이디어" />
+        </div>
+
+        {/* 트래커 + 아이디어 */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+
+          {/* 업로드 트래커 */}
+          <Card title="📅 업로드 일정 트래커" iconBg="#F2E8E0">
+            {data.weeks.map((w, i) => {
+              const pct = w.status === "done" ? 100 : w.status === "plan" ? 50 : 0;
+              const color = w.status === "done" ? "#3D5A47" : w.status === "plan" ? "#C9A84C" : "#ccc";
+              const label = w.status === "done" ? "완료 ✓" : w.status === "plan" ? "기획중" : "—";
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <span style={{ width: 40, fontSize: 11, color: "#999", flexShrink: 0 }}>W{w.week}</span>
+                  <div style={{ flex: 1, height: 6, background: "#E8DDD0", borderRadius: 10, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "#C4714A", borderRadius: 10, transition: "width 0.4s" }} />
+                  </div>
+                  <span
+                    onClick={() => cycleWeek(i)}
+                    style={{ width: 52, textAlign: "right", fontSize: 11, color, cursor: "pointer", fontWeight: w.status === "done" ? 600 : 400 }}
+                  >{label}</span>
+                </div>
+              );
+            })}
+          </Card>
+
+          {/* 아이디어 보드 */}
+          <Card title="💡 영상 아이디어 보드" iconBg="#F5EDD8">
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+              {data.ideas.slice(0, 5).map(idea => (
+                <div key={idea.id} style={{
+                  display: "flex", alignItems: "flex-start", gap: 8,
+                  padding: "8px 10px", borderRadius: 10,
+                  background: "#FDF9F4", border: "1px solid #E8DDD0",
+                }}>
+                  <span style={{
+                    fontSize: 10, padding: "2px 7px", borderRadius: 100, fontWeight: 600, flexShrink: 0, marginTop: 1,
+                    background: idea.type === "growth" ? "#E4EDE7" : "#F2E8E0",
+                    color: idea.type === "growth" ? "#3D5A47" : "#C4714A",
+                  }}>
+                    {idea.type === "growth" ? "성장" : "리뷰"}
+                  </span>
+                  <span style={{ fontSize: 12, lineHeight: 1.5 }}>{idea.text}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <select
+                value={ideaType}
+                onChange={e => setIdeaType(e.target.value)}
+                style={{ padding: "8px 8px", borderRadius: 10, border: "1px solid #E8DDD0", fontSize: 12, background: "#FDF9F4", outline: "none" }}
+              >
+                <option value="growth">성장기록</option>
+                <option value="review">용품리뷰</option>
+              </select>
+              <input
+                value={ideaInput}
+                onChange={e => setIdeaInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addIdea()}
+                placeholder="새 아이디어 입력..."
+                style={{ flex: 1, padding: "8px 12px", borderRadius: 10, border: "1px solid #E8DDD0", fontSize: 12, background: "#FDF9F4", outline: "none" }}
+              />
+              <button
+                onClick={addIdea}
+                style={{ padding: "8px 14px", background: "#C4714A", color: "white", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+              >+</button>
+            </div>
+          </Card>
+        </div>
+
+        {/* 체크리스트 + 메모 */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+
+          <Card title="✅ 채널 개설 체크리스트" iconBg="#E4EDE7">
+            {data.checks.map((c, i) => (
+              <div
+                key={i}
+                onClick={() => toggleCheck(i)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "8px 0", borderBottom: i < data.checks.length - 1 ? "1px solid #F5F0EA" : "none",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{
+                  width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                  border: c.done ? "none" : "2px solid #E8DDD0",
+                  background: c.done ? "#3D5A47" : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 11, color: "white", transition: "all 0.2s",
+                }}>
+                  {c.done ? "✓" : ""}
+                </div>
+                <span style={{ fontSize: 13, textDecoration: c.done ? "line-through" : "none", color: c.done ? "#B8B8B8" : "#2C2C2C" }}>
+                  {c.text}
+                </span>
+              </div>
+            ))}
+          </Card>
+
+          <Card title="📝 빠른 메모" iconBg="#F5EDD8">
+            <textarea
+              value={data.memo}
+              onChange={e => save({ ...data, memo: e.target.value })}
+              placeholder="채널 운영 아이디어, 기억할 것들을 자유롭게 적어두세요..."
+              style={{
+                width: "100%", minHeight: 160, border: "none", outline: "none",
+                background: "transparent", fontFamily: "inherit", fontSize: 13,
+                color: "#2C2C2C", resize: "none", lineHeight: 1.8,
+              }}
+            />
+          </Card>
+        </div>
+
+        <div style={{ textAlign: "center", fontSize: 12, color: "#ccc", marginTop: 40, paddingTop: 20, borderTop: "1px solid #E8DDD0" }}>
+          아빠의 기록 · 유튜브 채널 워크스페이스 · 호겸님 전용 💙
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Label({ text }) {
+  return <div style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: "#999", marginBottom: 12, fontWeight: 500 }}>{text}</div>;
+}
+
+function Pill({ children, color, textColor = "white" }) {
+  return (
+    <span style={{ padding: "5px 14px", borderRadius: 100, fontSize: 12, fontWeight: 500, background: color, color: textColor }}>
+      {children}
+    </span>
+  );
+}
+
+function StatCard({ num, label }) {
+  return (
+    <div style={{ background: "white", border: "1px solid #E8DDD0", borderRadius: 14, padding: "16px 18px", textAlign: "center" }}>
+      <div style={{ fontSize: 32, fontWeight: 700, color: "#2C2C2C", lineHeight: 1, marginBottom: 4 }}>{num}</div>
+      <div style={{ fontSize: 11, color: "#999" }}>{label}</div>
+    </div>
+  );
+}
+
+function Card({ title, iconBg, children }) {
+  return (
+    <div style={{ background: "white", borderRadius: 16, padding: "20px 22px", border: "1px solid #E8DDD0" }}>
+      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
+          {title.split(" ")[0]}
+        </div>
+        {title.split(" ").slice(1).join(" ")}
+      </div>
+      {children}
+    </div>
+  );
+}
