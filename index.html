@@ -3,619 +3,397 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>아빠의 기록 — 유튜브 채널 워크스페이스</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<title>호겸님의 워크스페이스</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --cream: #FAF7F2; --warm-white: #FDF9F4; --sand: #E8DDD0;
-    --terracotta: #C4714A; --terracotta-light: #D4896A; --terracotta-pale: #F2E8E0;
-    --forest: #3D5A47; --forest-pale: #E4EDE7;
-    --charcoal: #2C2C2C; --mid-gray: #7A7A7A; --light-gray: #B8B8B8;
-    --gold: #C9A84C; --gold-pale: #F5EDD8; --blue: #4A7BC4;
-    --edit-color: #6C63FF;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--cream); font-family:'Noto Sans KR',sans-serif; color:var(--charcoal); min-height:100vh; }
- 
-  /* EDIT MODE */
-  body.edit-mode [contenteditable] {
-    outline: 2px dashed var(--edit-color);
-    border-radius: 6px;
-    padding: 2px 6px;
-    background: rgba(108,99,255,0.05);
-    cursor: text;
-  }
-  body.edit-mode .edit-only { display: flex !important; }
-  body.edit-mode .delete-btn { display: flex !important; }
-  .edit-only { display: none !important; }
-  .delete-btn { display: none !important; }
- 
-  /* EDIT TOGGLE BTN */
-  .edit-toggle {
-    position: fixed; bottom: 28px; right: 28px; z-index: 999;
-    width: 52px; height: 52px; border-radius: 50%;
-    background: var(--charcoal); color: white;
-    border: none; font-size: 20px; cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-    transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .edit-toggle:hover { transform: scale(1.08); }
-  body.edit-mode .edit-toggle { background: var(--edit-color); }
- 
-  /* EDIT BANNER */
-  .edit-banner {
-    display: none;
-    background: var(--edit-color);
-    color: white;
-    text-align: center;
-    padding: 8px;
-    font-size: 12px;
-    letter-spacing: 1px;
-    font-weight: 600;
-  }
-  body.edit-mode .edit-banner { display: block; }
- 
-  /* HEADER */
-  header {
-    background: var(--charcoal); padding: 28px 40px 24px;
-    position: relative; overflow: hidden;
-  }
-  header::before {
-    content:''; position:absolute; top:-60px; right:-60px;
-    width:200px; height:200px; border-radius:50%;
-    background:var(--terracotta); opacity:0.15;
-  }
-  .header-inner {
-    max-width: 960px; margin: 0 auto;
-    display: flex; align-items: flex-end; justify-content: space-between;
-    position: relative; z-index: 1; flex-wrap: wrap; gap: 12px;
-  }
-  .channel-title { font-family:'DM Serif Display',serif; font-size:32px; color:var(--cream); line-height:1.1; }
-  .channel-title span { font-style:italic; color:var(--terracotta-light); }
-  .channel-sub { font-size:12px; color:var(--light-gray); margin-top:6px; letter-spacing:2px; text-transform:uppercase; font-weight:300; }
-  .dday-badge { text-align:right; }
-  .dday-num { font-family:'DM Serif Display',serif; font-size:48px; color:var(--terracotta-light); line-height:1; }
-  .dday-label { font-size:11px; color:var(--light-gray); letter-spacing:1.5px; text-transform:uppercase; }
-  .dday-date { font-size:11px; color:#666; margin-top:2px; }
- 
-  main { max-width:960px; margin:0 auto; padding:28px 20px 100px; }
- 
-  .section-label {
-    font-size:10px; letter-spacing:3px; text-transform:uppercase;
-    color:var(--mid-gray); margin-bottom:12px; font-weight:500;
-  }
- 
-  /* CONCEPT CARD */
-  .concept-card {
-    background:var(--charcoal); border-radius:16px; padding:24px 28px;
-    margin-bottom:20px; position:relative; overflow:hidden;
-  }
-  .concept-card::after {
-    content:'👶'; position:absolute; right:28px; top:50%;
-    transform:translateY(-50%); font-size:52px; opacity:0.15; pointer-events:none;
-  }
-  .concept-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--cream); margin-bottom:12px; min-width:20px; }
-  .concept-sub { font-size:12px; color:#aaa; margin-bottom:12px; min-width:20px; }
-  .concept-pills { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .pill {
-    padding:5px 14px; border-radius:100px; font-size:12px; font-weight:500;
-    display:flex; align-items:center; gap:6px;
-  }
-  .pill-terra { background:var(--terracotta); color:white; }
-  .pill-forest { background:var(--forest); color:white; }
-  .pill-gold { background:var(--gold); color:white; }
-  .pill-blue { background:var(--blue); color:white; }
-  .pill-outline { border:1px solid #555; color:var(--light-gray); }
- 
-  /* ADD PILL BTN */
-  .add-pill-btn {
-    padding:5px 12px; border-radius:100px; font-size:11px; font-weight:600;
-    background:transparent; border:1px dashed #555; color:#888; cursor:pointer;
-  }
- 
-  /* GRID */
-  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-  @media(max-width:600px) {
-    .grid-2 { grid-template-columns:1fr; }
-    header { padding:20px; }
-    .channel-title { font-size:22px; }
-    .dday-num { font-size:36px; }
-    .edit-toggle { bottom:16px; right:16px; }
-  }
- 
-  /* CARD */
-  .card { background:white; border-radius:16px; padding:20px 22px; border:1px solid var(--sand); }
-  .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .card-title { font-size:13px; font-weight:600; color:var(--charcoal); display:flex; align-items:center; gap:8px; }
-  .card-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-  .icon-terra { background:var(--terracotta-pale); }
-  .icon-forest { background:var(--forest-pale); }
-  .icon-gold { background:var(--gold-pale); }
- 
-  /* STATS */
-  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
-  .stat-card { background:white; border:1px solid var(--sand); border-radius:14px; padding:16px 18px; text-align:center; }
-  .stat-num { font-family:'DM Serif Display',serif; font-size:28px; color:var(--charcoal); line-height:1; margin-bottom:4px; }
-  .stat-label { font-size:11px; color:var(--mid-gray); }
- 
-  /* UPLOAD TRACKER */
-  .week-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-  .week-num { width:40px; font-size:11px; color:var(--mid-gray); flex-shrink:0; }
-  .week-bar-wrap { flex:1; height:6px; background:var(--sand); border-radius:10px; overflow:hidden; }
-  .week-bar { height:100%; border-radius:10px; background:var(--terracotta); transition:width 0.4s; }
-  .week-status { width:52px; text-align:right; font-size:11px; cursor:pointer; flex-shrink:0; }
-  .status-done { color:var(--forest); font-weight:600; }
-  .status-plan { color:var(--gold); }
-  .status-todo { color:var(--light-gray); }
-  .week-delete { width:18px; flex-shrink:0; }
- 
-  /* IDEAS */
-  .idea-item {
-    display:flex; align-items:flex-start; gap:8px;
-    padding:8px 10px; border-radius:10px;
-    background:var(--warm-white); border:1px solid var(--sand);
-    margin-bottom:6px;
-  }
-  .idea-type {
-    font-size:10px; padding:2px 7px; border-radius:100px;
-    font-weight:600; flex-shrink:0; margin-top:2px;
-  }
-  .type-growth { background:var(--forest-pale); color:var(--forest); }
-  .type-review { background:var(--terracotta-pale); color:var(--terracotta); }
-  .idea-text { font-size:12px; line-height:1.5; flex:1; min-width:0; word-break:break-all; }
- 
-  /* CHECKLIST */
-  .check-item {
-    display:flex; align-items:center; gap:10px;
-    padding:8px 0; border-bottom:1px solid var(--cream);
-    cursor:pointer; user-select:none;
-  }
-  .check-item:last-child { border-bottom:none; }
-  .check-box {
-    width:18px; height:18px; border-radius:5px;
-    border:2px solid var(--sand); display:flex; align-items:center;
-    justify-content:center; flex-shrink:0; transition:all 0.2s; font-size:11px;
-  }
-  .check-item.checked .check-box { background:var(--forest); border-color:var(--forest); color:white; }
-  .check-item.checked .check-text { text-decoration:line-through; color:var(--light-gray); }
-  .check-text { font-size:13px; flex:1; }
- 
-  /* LINKS */
-  .link-item {
-    display:flex; align-items:center; gap:8px;
-    padding:9px 12px; border-radius:10px;
-    background:var(--warm-white); border:1px solid var(--sand);
-    margin-bottom:6px; text-decoration:none; color:var(--charcoal);
-    transition:all 0.2s;
-  }
-  .link-item:hover { border-color:var(--terracotta); background:var(--terracotta-pale); }
-  .link-icon { font-size:16px; flex-shrink:0; }
-  .link-info { flex:1; min-width:0; }
-  .link-label { font-size:12px; font-weight:600; display:block; }
-  .link-url { font-size:10px; color:var(--mid-gray); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
- 
-  /* MEMO */
-  .memo-area {
-    width:100%; min-height:120px; border:none; outline:none;
-    background:transparent; font-family:inherit; font-size:13px;
-    color:var(--charcoal); resize:none; line-height:1.8;
-  }
-  .memo-area::placeholder { color:var(--light-gray); }
- 
-  /* ADD INPUT ROW */
-  .add-row { display:flex; gap:6px; margin-top:10px; }
-  .add-input {
-    flex:1; padding:8px 12px; border-radius:10px;
-    border:1px solid var(--sand); font-family:inherit; font-size:12px;
-    outline:none; background:var(--warm-white); color:var(--charcoal);
-  }
-  .add-input:focus { border-color:var(--edit-color); }
-  .add-input::placeholder { color:var(--light-gray); }
-  .type-select {
-    padding:8px 8px; border-radius:10px; border:1px solid var(--sand);
-    font-family:inherit; font-size:12px; background:var(--warm-white); outline:none;
-  }
-  .add-btn {
-    padding:8px 14px; background:var(--edit-color); color:white;
-    border:none; border-radius:10px; font-size:14px; font-weight:700;
-    cursor:pointer; font-family:inherit;
-  }
-  .small-btn {
-    padding:4px 10px; border-radius:8px; font-size:11px; font-weight:600;
-    cursor:pointer; border:none; font-family:inherit;
-  }
-  .btn-add-week { background:var(--forest-pale); color:var(--forest); }
-  .btn-remove-week { background:var(--terracotta-pale); color:var(--terracotta); }
- 
-  /* DELETE BTN */
-  .delete-btn {
-    width:18px; height:18px; border-radius:50%; background:#fee; border:1px solid #fcc;
-    color:#c55; font-size:10px; cursor:pointer; flex-shrink:0;
-    align-items:center; justify-content:center; font-weight:700;
-  }
- 
-  .footer-note {
-    text-align:center; font-size:12px; color:var(--light-gray);
-    margin-top:40px; padding-top:20px; border-top:1px solid var(--sand);
-  }
- 
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .concept-card,.stats-row,.grid-2,.card { animation:fadeUp 0.4s ease both; }
+:root{--cream:#FAF7F2;--warm:#FDF9F4;--sand:#E8DDD0;--terra:#C4714A;--terra-l:#D4896A;--terra-p:#F2E8E0;--forest:#3D5A47;--forest-p:#E4EDE7;--gold:#C9A84C;--gold-p:#F5EDD8;--blue:#4A7BC4;--blue-p:#E4EDF5;--red:#C44A4A;--red-p:#F5E4E4;--charcoal:#2C2C2C;--mid:#7A7A7A;--light:#B8B8B8;--edit:#6C63FF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--cream);font-family:'Noto Sans KR',sans-serif;color:var(--charcoal);min-height:100vh;}
+.edit-banner{display:none;background:var(--edit);color:white;text-align:center;padding:8px;font-size:12px;letter-spacing:1px;font-weight:600;}
+body.edit-mode .edit-banner{display:block;}
+body.edit-mode .edit-only{display:flex!important;}
+body.edit-mode .del-btn{display:flex!important;}
+.edit-only{display:none!important;}
+.del-btn{display:none!important;}
+body.edit-mode [contenteditable]{outline:2px dashed var(--edit);border-radius:5px;padding:2px 5px;background:rgba(108,99,255,0.06);cursor:text;}
+.edit-toggle{position:fixed;bottom:24px;right:24px;z-index:999;width:50px;height:50px;border-radius:50%;background:var(--charcoal);color:white;border:none;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.edit-toggle:hover{transform:scale(1.08);}
+body.edit-mode .edit-toggle{background:var(--edit);}
+.app-header{background:var(--charcoal);padding:20px 32px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.2);}
+.header-top{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;}
+.app-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--cream);}
+.app-title span{font-style:italic;color:var(--terra-l);}
+.dday-pill{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:100px;padding:6px 16px;font-size:12px;color:var(--light);display:flex;align-items:center;gap:8px;}
+.dday-pill strong{color:var(--terra-l);font-size:14px;}
+.tab-bar{max-width:1000px;margin:0 auto;display:flex;gap:2px;}
+.tab-btn{flex:1;padding:12px 8px 14px;border:none;background:transparent;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.tab-btn:hover{color:rgba(255,255,255,0.75);}
+.tab-btn.active{color:white;font-weight:600;}
+.tab-btn[data-tab="baby"].active{border-color:var(--terra);color:var(--terra-l);}
+.tab-btn[data-tab="yt"].active{border-color:var(--gold);color:#E0C070;}
+.panel{display:none;max-width:1000px;margin:0 auto;padding:28px 20px 100px;}
+.panel.active{display:block;animation:fadeUp 0.35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.slabel{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);margin-bottom:12px;font-weight:500;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+@media(max-width:620px){.g2,.g3,.g4{grid-template-columns:1fr;}.tab-btn .tl{display:none;}.app-header{padding:16px 16px 0;}.edit-toggle{bottom:16px;right:16px;}}
+.card{background:white;border-radius:16px;padding:20px 22px;border:1px solid var(--sand);margin-bottom:16px;}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-t{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.cicon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.hero{border-radius:16px;padding:24px 28px;margin-bottom:20px;position:relative;overflow:hidden;}
+.hero-emoji{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:56px;opacity:0.13;pointer-events:none;}
+.hero-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px;}
+.hero-sub{font-size:12px;opacity:0.7;margin-bottom:14px;}
+.yt-hero{background:var(--charcoal);color:var(--cream);}
+.baby-hero{background:linear-gradient(135deg,#2C2C2C,#3D2C28);color:var(--cream);}
+.pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.pill{padding:4px 13px;border-radius:100px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.pill-terra{background:var(--terra);color:white;}.pill-forest{background:var(--forest);color:white;}.pill-gold{background:var(--gold);color:white;}.pill-blue{background:var(--blue);color:white;}.pill-out{border:1px solid #555;color:#aaa;}
+.add-pill-btn{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;background:transparent;border:1px dashed #555;color:#888;cursor:pointer;}
+.stat{background:white;border:1px solid var(--sand);border-radius:14px;padding:14px 16px;text-align:center;}
+.stat-n{font-family:'DM Serif Display',serif;font-size:26px;line-height:1;margin-bottom:3px;}
+.stat-l{font-size:11px;color:var(--mid);}
+.prog-section{background:white;border:1px solid var(--sand);border-radius:16px;padding:20px 24px;margin-bottom:20px;}
+.prog-label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:10px;}
+.prog-wrap{height:8px;background:var(--sand);border-radius:10px;overflow:hidden;}
+.prog-bar-g{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--forest),var(--gold));transition:width 0.6s ease;}
+.wrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.wnum{width:38px;font-size:11px;color:var(--mid);flex-shrink:0;}
+.wbar-w{flex:1;height:6px;background:var(--sand);border-radius:10px;overflow:hidden;}
+.wbar{height:100%;border-radius:10px;background:var(--terra);transition:width 0.4s;}
+.wstatus{width:52px;text-align:right;font-size:11px;cursor:pointer;flex-shrink:0;}
+.s-done{color:var(--forest);font-weight:600;}.s-plan{color:var(--gold);}.s-todo{color:var(--light);}
+.idea-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:10px;background:var(--warm);border:1px solid var(--sand);margin-bottom:6px;}
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream);cursor:pointer;user-select:none;}
+.check-item:last-child{border-bottom:none;}
+.cbox{width:18px;height:18px;border-radius:5px;border:2px solid var(--sand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all 0.2s;}
+.check-item.done .cbox{background:var(--forest);border-color:var(--forest);color:white;}
+.check-item.done .ctext{text-decoration:line-through;color:var(--light);}
+.ctext{font-size:13px;flex:1;line-height:1.4;}
+.ctag{font-size:10px;padding:1px 7px;border-radius:100px;font-weight:600;flex-shrink:0;}
+.tag-provided{background:var(--blue-p);color:var(--blue);}.tag-optional{background:var(--gold-p);color:var(--gold);}
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.cat-tab{padding:5px 13px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--sand);color:var(--mid);background:white;transition:all 0.2s;}
+.cat-tab.active{background:var(--charcoal);color:white;border-color:var(--charcoal);}
+.cat-tab:hover:not(.active){border-color:var(--terra);color:var(--terra);}
+.emg-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--warm);border:1px solid var(--sand);margin-bottom:8px;transition:all 0.2s;}
+.emg-item:hover{border-color:var(--red);background:var(--red-p);}
+.emg-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.emg-info{flex:1;min-width:0;}
+.emg-name{font-size:13px;font-weight:600;}
+.emg-detail{font-size:11px;color:var(--mid);margin-top:2px;}
+.emg-type{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:700;flex-shrink:0;}
+.type-emg{background:var(--red-p);color:var(--red);}.type-ob{background:var(--terra-p);color:var(--terra);}.type-pedi{background:var(--forest-p);color:var(--forest);}
+.call-btn{padding:7px 14px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit;flex-shrink:0;}
+.link-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--warm);border:1px solid var(--sand);margin-bottom:6px;cursor:pointer;transition:all 0.2s;}
+.link-item:hover{border-color:var(--terra);background:var(--terra-p);}
+.link-info{flex:1;min-width:0;}
+.link-label{font-size:12px;font-weight:600;display:block;}
+.link-url{font-size:10px;color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+.memo{width:100%;min-height:100px;border:none;outline:none;background:transparent;font-family:inherit;font-size:13px;color:var(--charcoal);resize:none;line-height:1.8;}
+.memo::placeholder{color:var(--light);}
+.add-row{display:flex;gap:6px;margin-top:10px;}
+.add-input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--sand);font-family:inherit;font-size:12px;outline:none;background:var(--warm);color:var(--charcoal);}
+.add-input:focus{border-color:var(--edit);}
+.add-input::placeholder{color:var(--light);}
+.tsel{padding:8px;border-radius:10px;border:1px solid var(--sand);font-family:inherit;font-size:12px;background:var(--warm);outline:none;}
+.abtn{padding:8px 14px;background:var(--edit);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.sbtn{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;}
+.del-btn{width:18px;height:18px;border-radius:50%;background:#fee;border:1px solid #fcc;color:#c55;font-size:10px;cursor:pointer;flex-shrink:0;align-items:center;justify-content:center;font-weight:700;}
+.footer{text-align:center;font-size:12px;color:var(--light);margin-top:40px;padding-top:20px;border-top:1px solid var(--sand);}
 </style>
 </head>
 <body>
+<div class="edit-banner">✏️ 편집 모드 ON — 텍스트 클릭하면 바로 수정 · 💾 버튼으로 저장</div>
+<div class="app-header">
+  <div class="header-top">
+    <div class="app-title">호겸의 <span>워크스페이스</span></div>
+    <div class="dday-pill">👶 아들 출산까지 <strong id="ddayNum">D-?</strong> · 2026.09.12</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="baby" onclick="switchTab('baby')">🍼 <span class="tl">육아준비</span></button>
+    <button class="tab-btn" data-tab="yt" onclick="switchTab('yt')">🎬 <span class="tl">유튜브채널</span></button>
+  </div>
+</div>
  
-<div class="edit-banner">✏️ 편집 모드 ON — 텍스트를 클릭하면 바로 수정할 수 있어요</div>
- 
-<header>
-  <div class="header-inner">
-    <div>
-      <div class="channel-title">아빠의 <span contenteditable="false" id="titleAccent">기록</span></div>
-      <div class="channel-sub" contenteditable="false" id="channelSub">아들 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스</div>
+<!-- ════ BABY ════ -->
+<div class="panel active" id="panel-baby">
+  <div class="slabel">전체 준비 현황</div>
+  <div class="g4" id="babyStats"></div>
+  <div class="prog-section">
+    <div class="prog-label"><span>전체 준비 진행률</span><span id="progPct">0%</span></div>
+    <div class="prog-wrap"><div class="prog-bar-g" id="progBar" style="width:0%"></div></div>
+  </div>
+  <div class="hero baby-hero">
+    <div class="hero-emoji">🍼</div>
+    <div class="hero-title" contenteditable="false" id="baby-title">아들을 맞이할 준비를 차근차근 🤍</div>
+    <div class="hero-sub" contenteditable="false" id="baby-sub">출산 예정일 2026년 9월 12일 · 판교 트리니티 산후조리원 예약 완료</div>
+    <div class="pills" id="baby-pills"></div>
+  </div>
+  <div class="slabel">준비물 체크리스트</div>
+  <div class="card">
+    <div class="card-h">
+      <div class="card-t"><div class="cicon" style="background:var(--terra-p)">📋</div>카테고리별 준비물</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:10px;padding:2px 8px;border-radius:100px;background:var(--blue-p);color:var(--blue);font-weight:600;">🏥 조리원제공</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:100px;background:var(--gold-p);color:var(--gold);font-weight:600;">💡 선택구매</span>
+      </div>
     </div>
-    <div class="dday-badge">
-      <div class="dday-num" id="ddayNum">D-?</div>
-      <div class="dday-label">아들 출산 예정일까지</div>
-      <div class="dday-date">2026년 9월 12일</div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div id="checkList"></div>
+    <div class="add-row edit-only" style="margin-top:12px;flex-wrap:wrap;gap:6px;">
+      <select class="tsel" id="addCat"></select>
+      <select class="tsel" id="addTag"><option value="">일반</option><option value="provided">🏥 조리원제공</option><option value="optional">💡 선택구매</option></select>
+      <input class="add-input" id="addCheckInput" placeholder="새 준비물 추가..." style="min-width:160px;"/>
+      <button class="abtn" onclick="addBabyCheck()">+</button>
     </div>
   </div>
-</header>
- 
-<main>
- 
-  <!-- 채널 컨셉 -->
-  <div class="section-label">채널 컨셉</div>
-  <div class="concept-card">
-    <div class="concept-title" contenteditable="false" id="conceptTitle">아들의 하루하루를 아빠의 시선으로 기록합니다 💙</div>
-    <div class="concept-sub" contenteditable="false" id="conceptSub">타겟: 예비·초보 부모 · 주 1회 업로드 목표</div>
-    <div class="concept-pills" id="conceptPills"></div>
-  </div>
- 
-  <!-- 스탯 -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-num" id="totalCount">0</div>
-      <div class="stat-label">총 업로드 완료</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="growthCount">0</div>
-      <div class="stat-label">성장 기록 아이디어</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="reviewCount">0</div>
-      <div class="stat-label">용품 리뷰 아이디어</div>
+  <div class="slabel">🚨 응급 연락처</div>
+  <div class="card">
+    <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--red-p)">🚨</div>처인구 한터로 기준 주변 병원</div></div>
+    <div id="emgList"></div>
+    <div class="add-row edit-only" style="flex-direction:column;gap:6px;margin-top:12px;">
+      <div style="display:flex;gap:6px;">
+        <select class="tsel" id="emgType"><option value="emg">🚨 응급실</option><option value="ob">🏥 산부인과</option><option value="pedi">👶 소아청소년과</option></select>
+        <input class="add-input" id="emgName" placeholder="병원명"/>
+        <input class="add-input" id="emgPhone" placeholder="전화번호" style="max-width:140px;"/>
+      </div>
+      <div style="display:flex;gap:6px;"><input class="add-input" id="emgDetail" placeholder="주소 또는 메모"/><button class="abtn" onclick="addEmg()">+</button></div>
     </div>
   </div>
- 
-  <!-- 트래커 + 아이디어 -->
-  <div class="grid-2">
+  <div class="g2">
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <div class="card-icon icon-terra">📅</div>
-          업로드 일정 트래커
-        </div>
+      <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--gold-p)">🔗</div>유용한 링크</div></div>
+      <div id="baby-links"></div>
+      <div class="add-row edit-only" style="flex-direction:column;gap:6px;">
+        <div style="display:flex;gap:6px;"><input class="add-input" id="baby-lemoji" placeholder="🏥" style="width:55px;flex:none;"/><input class="add-input" id="baby-llabel" placeholder="링크 이름"/></div>
+        <div style="display:flex;gap:6px;"><input class="add-input" id="baby-lurl" placeholder="https://..."/><button class="abtn" onclick="addBabyLink()">+</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--forest-p)">📝</div>메모</div></div>
+      <textarea class="memo" id="baby-memo" placeholder="병원 예약 날짜, 구매 예정 일정, 기억할 것들..."></textarea>
+    </div>
+  </div>
+  <div class="footer">아들 출산 준비 워크스페이스 · 호겸님 전용 🍼💙</div>
+</div>
+ 
+<!-- ════ YOUTUBE ════ -->
+<div class="panel" id="panel-yt">
+  <div class="hero yt-hero">
+    <div class="hero-emoji">👶</div>
+    <div class="hero-title" contenteditable="false" id="yt-title">아들의 하루하루를 아빠의 시선으로 기록합니다 💙</div>
+    <div class="hero-sub" contenteditable="false" id="yt-sub">타겟: 예비·초보 부모 · 주 1회 업로드 목표</div>
+    <div class="pills" id="yt-pills"></div>
+  </div>
+  <div class="g3" id="ytStats"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-h">
+        <div class="card-t"><div class="cicon" style="background:var(--terra-p)">📅</div>업로드 일정 트래커</div>
         <div class="edit-only" style="gap:6px;">
-          <button class="small-btn btn-add-week" onclick="addWeek()">+ 주차</button>
-          <button class="small-btn btn-remove-week" onclick="removeWeek()">- 주차</button>
+          <button class="sbtn" style="background:var(--forest-p);color:var(--forest);" onclick="addWeek()">+ 주차</button>
+          <button class="sbtn" style="background:var(--terra-p);color:var(--terra);" onclick="removeWeek()">- 주차</button>
         </div>
       </div>
-      <div id="weekTracker"></div>
+      <div id="yt-weeks"></div>
     </div>
- 
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <div class="card-icon icon-gold">💡</div>
-          영상 아이디어 보드
-        </div>
-      </div>
-      <div id="ideaList"></div>
+      <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--gold-p)">💡</div>영상 아이디어 보드</div></div>
+      <div id="yt-ideas"></div>
       <div class="add-row edit-only">
-        <select class="type-select" id="ideaType">
-          <option value="growth">성장기록</option>
-          <option value="review">용품리뷰</option>
-        </select>
-        <input class="add-input" id="ideaInput" placeholder="새 아이디어..." />
-        <button class="add-btn" onclick="addIdea()">+</button>
+        <select class="tsel" id="yt-idea-type"><option value="growth">성장기록</option><option value="review">용품리뷰</option></select>
+        <input class="add-input" id="yt-idea-input" placeholder="새 아이디어..."/>
+        <button class="abtn" onclick="addIdea()">+</button>
       </div>
     </div>
   </div>
- 
-  <!-- 체크리스트 + 링크 -->
-  <div class="grid-2">
+  <div class="g2">
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <div class="card-icon icon-forest">✅</div>
-          채널 개설 체크리스트
-        </div>
-      </div>
-      <div id="checkList"></div>
+      <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--forest-p)">✅</div>채널 개설 체크리스트</div></div>
+      <div id="yt-checks"></div>
       <div class="add-row edit-only">
-        <input class="add-input" id="checkInput" placeholder="새 항목 추가..." />
-        <button class="add-btn" onclick="addCheck()">+</button>
+        <input class="add-input" id="yt-check-input" placeholder="새 항목 추가..."/>
+        <button class="abtn" onclick="addYtCheck()">+</button>
       </div>
     </div>
- 
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <div class="card-icon icon-gold">🔗</div>
-          유용한 링크
-        </div>
-      </div>
-      <div id="linkList"></div>
-      <div class="add-row edit-only" style="flex-direction:column; gap:6px;">
-        <div style="display:flex;gap:6px;">
-          <input class="add-input" id="linkEmoji" placeholder="아이콘(예:📺)" style="width:70px;flex:none;" />
-          <input class="add-input" id="linkLabel" placeholder="링크 이름" />
-        </div>
-        <div style="display:flex;gap:6px;">
-          <input class="add-input" id="linkUrl" placeholder="https://..." />
-          <button class="add-btn" onclick="addLink()">+</button>
-        </div>
+      <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--gold-p)">🔗</div>유용한 링크</div></div>
+      <div id="yt-links"></div>
+      <div class="add-row edit-only" style="flex-direction:column;gap:6px;">
+        <div style="display:flex;gap:6px;"><input class="add-input" id="yt-lemoji" placeholder="📺" style="width:55px;flex:none;"/><input class="add-input" id="yt-llabel" placeholder="링크 이름"/></div>
+        <div style="display:flex;gap:6px;"><input class="add-input" id="yt-lurl" placeholder="https://..."/><button class="abtn" onclick="addYtLink()">+</button></div>
       </div>
     </div>
   </div>
- 
-  <!-- 메모 -->
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-title" style="margin-bottom:12px;">
-      <div class="card-icon icon-gold">📝</div>
-      빠른 메모
-    </div>
-    <textarea class="memo-area" id="memoArea" placeholder="채널 운영 아이디어, 기억할 것들을 자유롭게 적어두세요..."></textarea>
+  <div class="card">
+    <div class="card-h"><div class="card-t"><div class="cicon" style="background:var(--gold-p)">📝</div>빠른 메모</div></div>
+    <textarea class="memo" id="yt-memo" placeholder="채널 운영 아이디어, 기억할 것들..."></textarea>
   </div>
+  <div class="footer">아빠의 기록 · 유튜브 채널 워크스페이스 💙</div>
+</div>
  
-  <div class="footer-note">아빠의 기록 · 유튜브 채널 워크스페이스 · 호겸님 전용 💙</div>
-</main>
- 
-<!-- 편집 토글 버튼 -->
-<button class="edit-toggle" onclick="toggleEdit()" title="편집 모드">✏️</button>
+<button class="edit-toggle" onclick="toggleEdit()">✏️</button>
  
 <script>
-  // ── D-DAY ──
-  (function() {
-    const due = new Date('2026-09-12T00:00:00');
-    const today = new Date(); today.setHours(0,0,0,0);
-    const diff = Math.round((due - today) / 86400000);
-    const el = document.getElementById('ddayNum');
-    el.textContent = diff > 0 ? 'D-'+diff : diff === 0 ? '🎉 오늘!' : 'D+'+Math.abs(diff);
-  })();
+(function(){
+  const due=new Date('2026-09-12T00:00:00'),today=new Date();
+  today.setHours(0,0,0,0);
+  const d=Math.round((due-today)/86400000);
+  document.getElementById('ddayNum').textContent=d>0?'D-'+d:d===0?'🎉':'D+'+Math.abs(d);
+})();
  
-  // ── DATA ──
-  const KEY = 'ytDash_v3';
-  let D = JSON.parse(localStorage.getItem(KEY) || 'null') || {
-    titleAccent: '기록',
-    channelSub: '아들 성장 기록 · 솔직 리뷰 · 유튜브 채널 워크스페이스',
-    conceptTitle: '아들의 하루하루를 아빠의 시선으로 기록합니다 💙',
-    conceptSub: '타겟: 예비·초보 부모 · 주 1회 업로드 목표',
-    pills: [
-      { text:'👶 아들 성장 기록', cls:'pill-blue' },
-      { text:'🛒 솔직 육아용품 리뷰', cls:'pill-terra' },
-      { text:'📅 주 1회 업로드', cls:'pill-gold' },
-    ],
-    ideas: [
-      { type:'growth', text:'태교 여행 브이로그 — 출산 전 마지막 둘만의 여행', id:1 },
-      { type:'growth', text:'아기방 꾸미기 과정 타임랩스', id:2 },
-      { type:'review', text:'유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)', id:3 },
-      { type:'review', text:'아기 모니터, 진짜 필요한가? 써보니까...', id:4 },
-      { type:'growth', text:'신생아 첫날 — 아빠가 처음 안아봤을 때', id:5 },
-    ],
-    checks: [
-      { text:'유튜브 채널 계정 생성', done:false },
-      { text:'채널 이름 & 핸들 확정', done:false },
-      { text:'채널 아트 & 프로필 사진 제작', done:false },
-      { text:'채널 소개글 작성', done:false },
-      { text:'첫 영상 촬영 및 편집 완료', done:false },
-      { text:'업로드 스케줄 공개', done:false },
-      { text:'쇼츠 연동 계획 수립', done:false },
-    ],
-    links: [
-      { emoji:'📺', label:'내 유튜브 채널', url:'https://youtube.com' },
-      { emoji:'📊', label:'유튜브 스튜디오', url:'https://studio.youtube.com' },
-    ],
-    memo: '',
-    weeks: Array(8).fill(null).map((_,i)=>({ week:i+1, status:'todo' })),
-  };
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-tab="'+t+'"]').classList.add('active');
+  document.getElementById('panel-'+t).classList.add('active');
+}
  
-  function save() { localStorage.setItem(KEY, JSON.stringify(D)); }
+const BKEY='baby_ws_v1',YKEY='yt_ws_v2';
+let B=JSON.parse(localStorage.getItem(BKEY)||'null')||{
+  'baby-title':'아들을 맞이할 준비를 차근차근 🤍',
+  'baby-sub':'출산 예정일 2026년 9월 12일 · 판교 트리니티 산후조리원 예약 완료',
+  babyPills:[{t:'🏥 정기검진',c:'pill-terra'},{t:'🛒 준비물 쇼핑',c:'pill-gold'},{t:'📚 육아공부',c:'pill-forest'}],
+  checks:[
+    {cat:'침실/수면',tx:'아기 침대',tag:'',done:false},{cat:'침실/수면',tx:'아기 매트리스',tag:'',done:false},{cat:'침실/수면',tx:'범퍼 가드',tag:'',done:false},{cat:'침실/수면',tx:'속싸개 (3~5장)',tag:'',done:false},{cat:'침실/수면',tx:'겉싸개',tag:'',done:false},{cat:'침실/수면',tx:'신생아 이불',tag:'',done:false},{cat:'침실/수면',tx:'모빌',tag:'optional',done:false},
+    {cat:'의류',tx:'배냇저고리 (5~7벌)',tag:'',done:false},{cat:'의류',tx:'우주복/바디수트 (5~7벌)',tag:'',done:false},{cat:'의류',tx:'양말 (5켤레)',tag:'',done:false},{cat:'의류',tx:'손싸개/발싸개',tag:'',done:false},{cat:'의류',tx:'신생아 모자',tag:'',done:false},
+    {cat:'수유',tx:'유축기',tag:'provided',done:false},{cat:'수유',tx:'젖병 (집에서 쓸 것)',tag:'',done:false},{cat:'수유',tx:'젖병 소독기',tag:'',done:false},{cat:'수유',tx:'젖병 세정제',tag:'',done:false},{cat:'수유',tx:'수유쿠션',tag:'',done:false},{cat:'수유',tx:'분유 (비상용)',tag:'optional',done:false},
+    {cat:'목욕/위생',tx:'아기 욕조',tag:'',done:false},{cat:'목욕/위생',tx:'아기 전용 샴푸/바디워시',tag:'provided',done:false},{cat:'목욕/위생',tx:'아기 수건 (5장)',tag:'',done:false},{cat:'목욕/위생',tx:'신생아 면봉',tag:'',done:false},{cat:'목욕/위생',tx:'아기 손톱가위',tag:'',done:false},{cat:'목욕/위생',tx:'체온계',tag:'',done:false},{cat:'목욕/위생',tx:'기저귀 (신생아용)',tag:'',done:false},{cat:'목욕/위생',tx:'물티슈',tag:'',done:false},{cat:'목욕/위생',tx:'기저귀 크림',tag:'',done:false},
+    {cat:'외출',tx:'카시트 (필수!)',tag:'',done:false},{cat:'외출',tx:'유모차',tag:'',done:false},{cat:'외출',tx:'아기띠/슬링',tag:'optional',done:false},
+    {cat:'집 환경',tx:'공기청정기',tag:'',done:false},{cat:'집 환경',tx:'가습기',tag:'',done:false},{cat:'집 환경',tx:'온습도계',tag:'',done:false},{cat:'집 환경',tx:'베이비캠 (아기 모니터)',tag:'optional',done:false},
+    {cat:'의료/안전',tx:'소아과 단골 병원 사전 예약',tag:'',done:false},{cat:'의료/안전',tx:'아기 보험 가입 검토',tag:'',done:false},{cat:'의료/안전',tx:'응급처치 키트',tag:'',done:false},{cat:'의료/안전',tx:'출생신고 준비',tag:'',done:false},
+  ],
+  emgs:[
+    {type:'emg',name:'용인서울병원',phone:'031-337-0114',detail:'24시간 응급실 · 처인구 고림로 81 · 약 2km'},
+    {type:'emg',name:'용인세브란스병원',phone:'1899-1004',detail:'대학병원 응급실 · 기흥구 동백죽전대로 363 · 약 10km'},
+    {type:'ob',name:'용인제일산부인과',phone:'031-8031-0200',detail:'처인구 김량장동 · 약 2km'},
+    {type:'ob',name:'한솔산부인과의원',phone:'031-339-4545',detail:'처인구 김량장동 · 약 2km'},
+    {type:'pedi',name:'웜봄소아청소년과',phone:'031-334-3323',detail:'처인구 역북동 · 약 2km'},
+  ],
+  babyLinks:[{e:'🏥',l:'판교 트리니티 산후조리원',u:'https://trinitycare.co.kr/pge/index.html'},{e:'🛒',l:'쿠팡 베이비',u:'https://www.coupang.com'},{e:'👶',l:'아이사랑 포털',u:'https://www.childcare.go.kr'}],
+  babyMemo:'',
+};
+let Y=JSON.parse(localStorage.getItem(YKEY)||'null')||{
+  'yt-title':'아들의 하루하루를 아빠의 시선으로 기록합니다 💙',
+  'yt-sub':'타겟: 예비·초보 부모 · 주 1회 업로드 목표',
+  ytPills:[{t:'👶 아들 성장 기록',c:'pill-blue'},{t:'🛒 솔직 육아용품 리뷰',c:'pill-terra'},{t:'📅 주 1회 업로드',c:'pill-gold'}],
+  ytIdeas:[{type:'growth',tx:'태교 여행 브이로그 — 출산 전 마지막 둘만의 여행'},{type:'growth',tx:'아기방 꾸미기 과정 타임랩스'},{type:'review',tx:'유모차 3종 솔직 비교 리뷰 (가성비 vs 프리미엄)'},{type:'review',tx:'아기 모니터, 진짜 필요한가? 써보니까...'},{type:'growth',tx:'신생아 첫날 — 아빠가 처음 안아봤을 때'}],
+  ytChecks:[{tx:'유튜브 채널 계정 생성',done:false},{tx:'채널 이름 & 핸들 확정',done:false},{tx:'채널 아트 & 프로필 사진 제작',done:false},{tx:'채널 소개글 작성',done:false},{tx:'첫 영상 촬영 및 편집 완료',done:false},{tx:'업로드 스케줄 공개',done:false}],
+  ytLinks:[{e:'📺',l:'내 유튜브 채널',u:'https://youtube.com'},{e:'📊',l:'유튜브 스튜디오',u:'https://studio.youtube.com'}],
+  ytWeeks:Array(8).fill(null).map((_,i)=>({w:i+1,s:'todo'})),
+  ytMemo:'',
+};
+function saveB(){localStorage.setItem(BKEY,JSON.stringify(B));}
+function saveY(){localStorage.setItem(YKEY,JSON.stringify(Y));}
  
-  // ── EDIT MODE ──
-  let editMode = false;
-  function toggleEdit() {
-    editMode = !editMode;
-    document.body.classList.toggle('edit-mode', editMode);
-    document.querySelector('.edit-toggle').textContent = editMode ? '💾' : '✏️';
-    document.querySelector('.edit-toggle').title = editMode ? '저장' : '편집 모드';
- 
-    // contenteditable 토글
-    ['titleAccent','channelSub','conceptTitle','conceptSub'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.contentEditable = editMode ? 'true' : 'false';
-    });
- 
-    if (!editMode) {
-      // 저장
-      ['titleAccent','channelSub','conceptTitle','conceptSub'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) D[id] = el.textContent.trim();
-      });
-      save();
-    }
+let editMode=false;
+function toggleEdit(){
+  editMode=!editMode;
+  document.body.classList.toggle('edit-mode',editMode);
+  document.querySelector('.edit-toggle').textContent=editMode?'💾':'✏️';
+  ['baby-title','baby-sub','yt-title','yt-sub'].forEach(id=>{const el=document.getElementById(id);if(el)el.contentEditable=editMode?'true':'false';});
+  if(!editMode){
+    B['baby-title']=document.getElementById('baby-title').textContent.trim();
+    B['baby-sub']=document.getElementById('baby-sub').textContent.trim();
+    Y['yt-title']=document.getElementById('yt-title').textContent.trim();
+    Y['yt-sub']=document.getElementById('yt-sub').textContent.trim();
+    saveB();saveY();
   }
+  renderAllPills();renderBabyChecks();renderEmg();renderBabyLinks();renderYtIdeas();renderYtChecks();renderYtLinks();renderWeeks();
+}
  
-  // ── PILLS ──
-  function renderPills() {
-    const el = document.getElementById('conceptPills');
-    el.innerHTML = '';
-    D.pills.forEach((p, i) => {
-      const span = document.createElement('span');
-      span.className = 'pill ' + p.cls;
-      span.textContent = p.text;
-      if (editMode) {
-        const del = document.createElement('button');
-        del.style.cssText = 'background:rgba(255,255,255,0.3);border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;color:white;font-weight:700;line-height:1;padding:0;';
-        del.textContent = '×';
-        del.onclick = () => { D.pills.splice(i,1); save(); renderPills(); };
-        span.appendChild(del);
-      }
-      el.appendChild(span);
-    });
-    if (editMode) {
-      const btn = document.createElement('button');
-      btn.className = 'add-pill-btn';
-      btn.textContent = '+ 태그 추가';
-      btn.onclick = () => {
-        const text = prompt('태그 내용 입력:');
-        if (!text) return;
-        const colors = ['pill-terra','pill-forest','pill-gold','pill-blue','pill-outline'];
-        const cls = colors[D.pills.length % colors.length];
-        D.pills.push({ text, cls });
-        save(); renderPills();
-      };
-      el.appendChild(btn);
-    }
-  }
+function renderPills(elId,arr,saveFn){
+  const el=document.getElementById(elId);el.innerHTML='';
+  arr.forEach((p,i)=>{const s=document.createElement('span');s.className='pill '+p.c;s.textContent=p.t;if(editMode){const d=document.createElement('button');d.style.cssText='background:rgba(255,255,255,0.3);border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;color:white;font-weight:700;line-height:1;padding:0;margin-left:2px;';d.textContent='×';d.onclick=()=>{arr.splice(i,1);saveFn();renderPills(elId,arr,saveFn);};s.appendChild(d);}el.appendChild(s);});
+  if(editMode){const b=document.createElement('button');b.className='add-pill-btn';b.textContent='+ 태그';b.onclick=()=>{const tx=prompt('태그 입력:');if(!tx)return;const cols=['pill-terra','pill-forest','pill-gold','pill-blue','pill-out'];arr.push({t:tx,c:cols[arr.length%cols.length]});saveFn();renderPills(elId,arr,saveFn);};el.appendChild(b);}
+}
+function renderAllPills(){renderPills('baby-pills',B.babyPills,saveB);renderPills('yt-pills',Y.ytPills,saveY);}
  
-  // ── WEEKS ──
-  function renderWeeks() {
-    const el = document.getElementById('weekTracker');
-    el.innerHTML = '';
-    D.weeks.forEach((w, i) => {
-      const pct = w.status==='done'?100:w.status==='plan'?50:0;
-      const cls = w.status==='done'?'status-done':w.status==='plan'?'status-plan':'status-todo';
-      const lbl = w.status==='done'?'완료 ✓':w.status==='plan'?'기획중':'—';
-      const row = document.createElement('div');
-      row.className = 'week-row';
-      row.innerHTML = `
-        <span class="week-num">W${w.week}</span>
-        <div class="week-bar-wrap"><div class="week-bar" style="width:${pct}%"></div></div>
-        <span class="week-status ${cls}" onclick="cycleWeek(${i})">${lbl}</span>
-        <button class="delete-btn" onclick="deleteWeek(${i})">×</button>
-      `;
-      el.appendChild(row);
-    });
-    updateStats();
-  }
-  window.cycleWeek = (i) => {
-    const s=['todo','plan','done'];
-    D.weeks[i].status = s[(s.indexOf(D.weeks[i].status)+1)%3];
-    save(); renderWeeks();
-  };
-  window.deleteWeek = (i) => { D.weeks.splice(i,1); save(); renderWeeks(); };
-  window.addWeek = () => { D.weeks.push({ week: D.weeks.length+1, status:'todo' }); save(); renderWeeks(); };
-  window.removeWeek = () => { if(D.weeks.length>1){ D.weeks.pop(); save(); renderWeeks(); } };
+const CATS=['전체','침실/수면','의류','수유','목욕/위생','외출','집 환경','의료/안전'];
+let curCat='전체';
+function renderCatTabs(){
+  const el=document.getElementById('catTabs');el.innerHTML='';
+  const sel=document.getElementById('addCat');sel.innerHTML='';
+  CATS.filter(c=>c!=='전체').forEach(c=>{const opt=document.createElement('option');opt.value=c;opt.textContent=c;sel.appendChild(opt);});
+  CATS.forEach(c=>{const btn=document.createElement('button');btn.className='cat-tab'+(c===curCat?' active':'');const cnt=c==='전체'?B.checks.length:B.checks.filter(x=>x.cat===c).length,done=c==='전체'?B.checks.filter(x=>x.done).length:B.checks.filter(x=>x.cat===c&&x.done).length;btn.textContent=`${c} ${done}/${cnt}`;btn.onclick=()=>{curCat=c;renderCatTabs();renderBabyChecks();};el.appendChild(btn);});
+}
+function renderBabyChecks(){
+  const el=document.getElementById('checkList');el.innerHTML='';
+  const list=curCat==='전체'?B.checks:B.checks.filter(c=>c.cat===curCat);
+  list.forEach(c=>{const i=B.checks.indexOf(c);const div=document.createElement('div');div.className='check-item'+(c.done?' done':'');let tg='';if(c.tag==='provided')tg='<span class="ctag tag-provided">🏥 조리원제공</span>';else if(c.tag==='optional')tg='<span class="ctag tag-optional">💡 선택구매</span>';div.innerHTML=`<div class="cbox">${c.done?'✓':''}</div><span class="ctext">${c.tx}</span>${tg}`;const db=document.createElement('button');db.className='del-btn';db.textContent='×';db.onclick=(e)=>{e.stopPropagation();B.checks.splice(i,1);saveB();renderAll();};div.appendChild(db);div.addEventListener('click',()=>{B.checks[i].done=!B.checks[i].done;saveB();renderAll();});el.appendChild(div);});
+  updateBabyStats();
+}
+window.addBabyCheck=()=>{const tx=document.getElementById('addCheckInput').value.trim(),cat=document.getElementById('addCat').value,tag=document.getElementById('addTag').value;if(!tx)return;B.checks.push({cat,tx,tag,done:false});document.getElementById('addCheckInput').value='';saveB();renderAll();};
+document.getElementById('addCheckInput').addEventListener('keydown',e=>{if(e.key==='Enter')addBabyCheck();});
  
-  // ── IDEAS ──
-  function renderIdeas() {
-    const el = document.getElementById('ideaList');
-    el.innerHTML = '';
-    D.ideas.forEach((idea, i) => {
-      const div = document.createElement('div');
-      div.className = 'idea-item';
-      div.innerHTML = `
-        <span class="idea-type ${idea.type==='growth'?'type-growth':'type-review'}">${idea.type==='growth'?'성장':'리뷰'}</span>
-        <span class="idea-text">${idea.text}</span>
-        <button class="delete-btn" onclick="deleteIdea(${i})">×</button>
-      `;
-      el.appendChild(div);
-    });
-    updateStats();
-  }
-  window.addIdea = () => {
-    const input = document.getElementById('ideaInput');
-    const type = document.getElementById('ideaType').value;
-    if (!input.value.trim()) return;
-    D.ideas.unshift({ type, text:input.value.trim(), id:Date.now() });
-    input.value = '';
-    save(); renderIdeas();
-  };
-  window.deleteIdea = (i) => { D.ideas.splice(i,1); save(); renderIdeas(); };
-  document.getElementById('ideaInput').addEventListener('keydown', e => { if(e.key==='Enter') addIdea(); });
+function updateBabyStats(){
+  const total=B.checks.length,done=B.checks.filter(c=>c.done).length,pct=total?Math.round(done/total*100):0;
+  const due=new Date('2026-09-12'),today=new Date();today.setHours(0,0,0,0);const dd=Math.max(0,Math.round((due-today)/86400000));
+  document.getElementById('babyStats').innerHTML=`<div class="stat"><div class="stat-n" style="color:var(--terra)">${done}</div><div class="stat-l">준비 완료</div></div><div class="stat"><div class="stat-n" style="color:var(--mid)">${total-done}</div><div class="stat-l">남은 항목</div></div><div class="stat"><div class="stat-n" style="color:var(--forest)">${pct}%</div><div class="stat-l">진행률</div></div><div class="stat"><div class="stat-n" style="color:var(--gold)">${dd}</div><div class="stat-l">D-Day</div></div>`;
+  document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%';
+}
  
-  // ── CHECKS ──
-  function renderChecks() {
-    const el = document.getElementById('checkList');
-    el.innerHTML = '';
-    D.checks.forEach((c, i) => {
-      const div = document.createElement('div');
-      div.className = 'check-item' + (c.done?' checked':'');
-      div.innerHTML = `
-        <div class="check-box">${c.done?'✓':''}</div>
-        <span class="check-text">${c.text}</span>
-        <button class="delete-btn" onclick="event.stopPropagation();deleteCheck(${i})">×</button>
-      `;
-      div.addEventListener('click', () => { D.checks[i].done=!D.checks[i].done; save(); renderChecks(); });
-      el.appendChild(div);
-    });
-  }
-  window.addCheck = () => {
-    const input = document.getElementById('checkInput');
-    if (!input.value.trim()) return;
-    D.checks.push({ text:input.value.trim(), done:false });
-    input.value = '';
-    save(); renderChecks();
-  };
-  window.deleteCheck = (i) => { D.checks.splice(i,1); save(); renderChecks(); };
-  document.getElementById('checkInput').addEventListener('keydown', e => { if(e.key==='Enter') addCheck(); });
+function renderEmg(){
+  const el=document.getElementById('emgList');el.innerHTML='';
+  const tm={emg:{label:'응급실',cls:'type-emg',icon:'🚨',bg:'var(--red-p)',bc:'#C44A4A'},ob:{label:'산부인과',cls:'type-ob',icon:'🏥',bg:'var(--terra-p)',bc:'var(--terra)'},pedi:{label:'소아청소년과',cls:'type-pedi',icon:'👶',bg:'var(--forest-p)',bc:'var(--forest)'}};
+  B.emgs.forEach((e,i)=>{const t=tm[e.type]||tm.emg;const div=document.createElement('div');div.className='emg-item';div.innerHTML=`<div class="emg-icon" style="background:${t.bg}">${t.icon}</div><div class="emg-info"><div class="emg-name">${e.name}</div><div class="emg-detail">${e.detail}</div></div><span class="emg-type ${t.cls}">${t.label}</span><a href="tel:${e.phone}" style="text-decoration:none;"><button class="call-btn" style="background:${t.bc};color:white;">📞 ${e.phone}</button></a>`;const db=document.createElement('button');db.className='del-btn';db.textContent='×';db.onclick=()=>{B.emgs.splice(i,1);saveB();renderEmg();};div.appendChild(db);el.appendChild(div);});
+}
+window.addEmg=()=>{const type=document.getElementById('emgType').value,name=document.getElementById('emgName').value.trim(),phone=document.getElementById('emgPhone').value.trim(),detail=document.getElementById('emgDetail').value.trim();if(!name||!phone)return;B.emgs.push({type,name,phone,detail});['emgName','emgPhone','emgDetail'].forEach(id=>document.getElementById(id).value='');saveB();renderEmg();};
  
-  // ── LINKS ──
-  function renderLinks() {
-    const el = document.getElementById('linkList');
-    el.innerHTML = '';
-    D.links.forEach((lk, i) => {
-      const div = document.createElement('div');
-      div.className = 'link-item';
-      div.style.cursor = 'pointer';
-      div.innerHTML = `
-        <span class="link-icon">${lk.emoji||'🔗'}</span>
-        <div class="link-info">
-          <span class="link-label">${lk.label}</span>
-          <span class="link-url">${lk.url}</span>
-        </div>
-        <button class="delete-btn" onclick="event.stopPropagation();deleteLink(${i})">×</button>
-      `;
-      div.addEventListener('click', () => { if(!editMode) window.open(lk.url,'_blank'); });
-      el.appendChild(div);
-    });
-  }
-  window.addLink = () => {
-    const emoji = document.getElementById('linkEmoji').value.trim() || '🔗';
-    const label = document.getElementById('linkLabel').value.trim();
-    const url = document.getElementById('linkUrl').value.trim();
-    if (!label || !url) return;
-    D.links.push({ emoji, label, url: url.startsWith('http')?url:'https://'+url });
-    document.getElementById('linkEmoji').value='';
-    document.getElementById('linkLabel').value='';
-    document.getElementById('linkUrl').value='';
-    save(); renderLinks();
-  };
-  window.deleteLink = (i) => { D.links.splice(i,1); save(); renderLinks(); };
+function renderLinks(elId,arr,saveFn){
+  const el=document.getElementById(elId);el.innerHTML='';
+  arr.forEach((lk,i)=>{const div=document.createElement('div');div.className='link-item';div.innerHTML=`<span style="font-size:18px">${lk.e||'🔗'}</span><div class="link-info"><span class="link-label">${lk.l}</span><span class="link-url">${lk.u}</span></div>`;const db=document.createElement('button');db.className='del-btn';db.textContent='×';db.onclick=(e)=>{e.stopPropagation();arr.splice(i,1);saveFn();renderLinks(elId,arr,saveFn);};div.appendChild(db);div.addEventListener('click',()=>{if(!editMode)window.open(lk.u,'_blank');});el.appendChild(div);});
+}
+function addLinkG(arr,eid,lid,uid,saveFn,renderFn){const e=document.getElementById(eid).value.trim()||'🔗',l=document.getElementById(lid).value.trim(),u=document.getElementById(uid).value.trim();if(!l||!u)return;arr.push({e,l,u:u.startsWith('http')?u:'https://'+u});[eid,lid,uid].forEach(id=>document.getElementById(id).value='');saveFn();renderFn();}
  
-  // ── MEMO ──
-  const memoEl = document.getElementById('memoArea');
-  memoEl.value = D.memo;
-  memoEl.addEventListener('input', () => { D.memo = memoEl.value; save(); });
+function renderBabyLinks(){renderLinks('baby-links',B.babyLinks,saveB);}
+window.addBabyLink=()=>addLinkG(B.babyLinks,'baby-lemoji','baby-llabel','baby-lurl',saveB,renderBabyLinks);
  
-  // ── STATS ──
-  function updateStats() {
-    document.getElementById('totalCount').textContent = D.weeks.filter(w=>w.status==='done').length;
-    document.getElementById('growthCount').textContent = D.ideas.filter(i=>i.type==='growth').length;
-    document.getElementById('reviewCount').textContent = D.ideas.filter(i=>i.type==='review').length;
-  }
+const bMemo=document.getElementById('baby-memo');bMemo.value=B.babyMemo||'';bMemo.addEventListener('input',()=>{B.babyMemo=bMemo.value;saveB();});
  
-  // ── INIT TEXT ──
-  ['titleAccent','channelSub','conceptTitle','conceptSub'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el && D[id]) el.textContent = D[id];
-  });
+function renderWeeks(){
+  const el=document.getElementById('yt-weeks');el.innerHTML='';
+  Y.ytWeeks.forEach((w,i)=>{const pct=w.s==='done'?100:w.s==='plan'?50:0,cls=w.s==='done'?'s-done':w.s==='plan'?'s-plan':'s-todo',lbl=w.s==='done'?'완료 ✓':w.s==='plan'?'기획중':'—';const r=document.createElement('div');r.className='wrow';r.innerHTML=`<span class="wnum">W${w.w}</span><div class="wbar-w"><div class="wbar" style="width:${pct}%"></div></div><span class="wstatus ${cls}" onclick="cycleWeek(${i})">${lbl}</span>`;const db=document.createElement('button');db.className='del-btn';db.textContent='×';db.onclick=()=>{Y.ytWeeks.splice(i,1);saveY();renderWeeks();};r.appendChild(db);el.appendChild(r);});
+  updateYtStats();
+}
+window.cycleWeek=(i)=>{const s=['todo','plan','done'];Y.ytWeeks[i].s=s[(s.indexOf(Y.ytWeeks[i].s)+1)%3];saveY();renderWeeks();};
+window.addWeek=()=>{Y.ytWeeks.push({w:Y.ytWeeks.length+1,s:'todo'});saveY();renderWeeks();};
+window.removeWeek=()=>{if(Y.ytWeeks.length>1){Y.ytWeeks.pop();saveY();renderWeeks();}};
  
-  // ── RENDER ALL ──
-  renderPills(); renderWeeks(); renderIdeas(); renderChecks(); renderLinks(); updateStats();
+function renderYtIdeas(){
+  const el=document.getElementById('yt-ideas');el.innerHTML='';
+  Y.ytIdeas.forEach((idea,i)=>{const div=document.createElement('div');div.className='idea-item';const tg=idea.type==='growth'?'성장':'리뷰',bg=idea.type==='growth'?'var(--forest-p)':'var(--terra-p)',col=idea.type==='growth'?'var(--forest)':'var(--terra)';div.innerHTML=`<span style="font-size:10px;padding:2px 7px;border-radius:100px;font-weight:600;flex-shrink:0;background:${bg};color:${col}">${tg}</span><span style="font-size:12px;line-height:1.4;flex:1">${idea.tx}</span>`;const db=document.createElement('button');db.className='del-btn';db.textContent='×';db.onclick=()=>{Y.ytIdeas.splice(i,1);saveY();renderYtIdeas();updateYtStats();};div.appendChild(db);el.appendChild(div);});
+  updateYtStats();
+}
+window.addIdea=()=>{const input=document.getElementById('yt-idea-input'),type=document.getElementById('yt-idea-type').value;if(!input.value.trim())return;Y.ytIdeas.unshift({type,tx:input.value.trim()});input.value='';saveY();renderYtIdeas();};
+document.getElementById('yt-idea-input').addEventListener('keydown',e=>{if(e.key==='Enter')addIdea();});
+ 
+function renderYtChecks(){
+  const el=document.getElementById('yt-checks');el.innerHTML='';
+  Y.ytChecks.forEach((c,i)=>{const div=document.createElement('div');div.className='check-item'+(c.done?' done':'');div.innerHTML=`<div class="cbox">${c.done?'✓':''}</div><span class="ctext">${c.tx}</span>`;const db=document.createElement('button');db.className='del-btn';db.textContent='×';db.onclick=(e)=>{e.stopPropagation();Y.ytChecks.splice(i,1);saveY();renderYtChecks();};div.appendChild(db);div.addEventListener('click',()=>{Y.ytChecks[i].done=!Y.ytChecks[i].done;saveY();renderYtChecks();});el.appendChild(div);});
+}
+window.addYtCheck=()=>{const i=document.getElementById('yt-check-input');if(!i.value.trim())return;Y.ytChecks.push({tx:i.value.trim(),done:false});i.value='';saveY();renderYtChecks();};
+document.getElementById('yt-check-input').addEventListener('keydown',e=>{if(e.key==='Enter')addYtCheck();});
+ 
+function renderYtLinks(){renderLinks('yt-links',Y.ytLinks,saveY);}
+window.addYtLink=()=>addLinkG(Y.ytLinks,'yt-lemoji','yt-llabel','yt-lurl',saveY,renderYtLinks);
+ 
+function updateYtStats(){const done=Y.ytWeeks.filter(w=>w.s==='done').length,gr=Y.ytIdeas.filter(i=>i.type==='growth').length,rv=Y.ytIdeas.filter(i=>i.type==='review').length;document.getElementById('ytStats').innerHTML=`<div class="stat"><div class="stat-n" style="color:var(--terra)">${done}</div><div class="stat-l">총 업로드 완료</div></div><div class="stat"><div class="stat-n" style="color:var(--forest)">${gr}</div><div class="stat-l">성장기록 아이디어</div></div><div class="stat"><div class="stat-n" style="color:var(--gold)">${rv}</div><div class="stat-l">용품리뷰 아이디어</div></div>`;}
+ 
+const yMemo=document.getElementById('yt-memo');yMemo.value=Y.ytMemo||'';yMemo.addEventListener('input',()=>{Y.ytMemo=yMemo.value;saveY();});
+ 
+['baby-title','baby-sub'].forEach(id=>{const el=document.getElementById(id);if(el&&B[id])el.textContent=B[id];});
+['yt-title','yt-sub'].forEach(id=>{const el=document.getElementById(id);if(el&&Y[id])el.textContent=Y[id];});
+ 
+function renderAll(){renderCatTabs();renderBabyChecks();renderEmg();renderBabyLinks();renderYtIdeas();renderYtChecks();renderYtLinks();renderWeeks();renderAllPills();}
+renderAll();
 </script>
 </body>
 </html>
  
+
+
